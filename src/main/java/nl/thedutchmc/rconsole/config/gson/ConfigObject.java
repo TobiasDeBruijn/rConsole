@@ -1,9 +1,10 @@
 package nl.thedutchmc.rconsole.config.gson;
 
 public class ConfigObject {
-	private boolean debugMode;
+	private boolean debugMode, useIntegratedDashboardServer;
 	private int listenPort;
 	private TokenObject[] tokens;
+	
 	/**
 	 * @return the debugMode
 	 */
@@ -21,6 +22,12 @@ public class ConfigObject {
 	 */
 	public TokenObject[] getTokens() {
 		return tokens;
+	}
+	/**
+	 * @return the useIntegratedDashboardServer
+	 */
+	public boolean isUseIntegratedDashboardServer() {
+		return useIntegratedDashboardServer;
 	}
 	
 }

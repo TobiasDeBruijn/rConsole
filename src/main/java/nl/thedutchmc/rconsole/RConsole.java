@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.google.gson.Gson;
 
 import nl.thedutchmc.rconsole.config.Configuration;
+import nl.thedutchmc.rconsole.dashboard.DashboardServer;
 import nl.thedutchmc.rconsole.gson.out.ServerShutdownPacket;
 import nl.thedutchmc.rconsole.tcp.TcpClient;
 import nl.thedutchmc.rconsole.tcp.TcpServer;
@@ -20,6 +21,7 @@ public class RConsole extends JavaPlugin {
 	private static volatile boolean IS_RUNNING = true;
 	
 	private TcpServer tcpServer;
+	private DashboardServer dashboardServer;
 	
 	@Override
 	public void onEnable() {
@@ -29,7 +31,15 @@ public class RConsole extends JavaPlugin {
 		RConsole.DEBUG = config.getConfig().isDebugMode();
 		
 		this.tcpServer = new TcpServer(config.getConfig().getListenPort(), config.getConfig().getTokens(), this);
-		new Thread(tcpServer, "rConsole-TCPServer-Thread").start();		
+		new Thread(tcpServer, "rConsole-TCPServer-Thread").start();
+		
+		if(config.getConfig().isUseIntegratedDashboardServer()) {
+			RConsole.logInfo("Config option 'useIntegratedDashboardServer' is set to true. Loading library and starting dashboard.");
+			this.dashboardServer = new DashboardServer();
+			this.dashboardServer.startDashboardServer(this.getDataFolder().getAbsolutePath());
+		} else {
+			RConsole.logInfo("Config option 'useIntegratedDashboardServer' is set to false. Skipping.");
+		}
 	}
 	
 	@Override
@@ -51,7 +61,7 @@ public class RConsole extends JavaPlugin {
 				pw.close();
 			} catch(IOException e) {
 			}
-		}
+		}		
 	}
 	
 	public static void logInfo(Object log) {
