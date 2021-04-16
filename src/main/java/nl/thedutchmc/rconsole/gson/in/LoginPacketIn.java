@@ -43,9 +43,9 @@ public class LoginPacketIn extends BasicPacketIn {
 			return false;
 		}
 				
-		java.util.List<Scope> scopesAsList = Arrays.asList(this.scopes);
-		for(Scope scope : tokenObject.getScopes()) {
-			if(!scopesAsList.contains(scope)) {
+		java.util.List<Scope> permittedScopes = Arrays.asList(tokenObject.getScopes());
+		for(Scope scope : this.scopes) {
+			if(!permittedScopes.contains(scope)) {
 				RConsole.logDebug(String.format("Signin failed. 'scope' failed on scope '%s'", scope.toString()));
 				return false;
 			}

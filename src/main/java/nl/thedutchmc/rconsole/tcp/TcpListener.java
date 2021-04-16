@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
+import java.net.SocketException;
+import java.util.Arrays;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -15,6 +17,7 @@ import com.google.gson.JsonSyntaxException;
 import nl.thedutchmc.rconsole.RConsole;
 import nl.thedutchmc.rconsole.config.gson.TokenObject;
 import nl.thedutchmc.rconsole.features.readconsole.ReadConsole;
+import nl.thedutchmc.rconsole.gson.Scope;
 import nl.thedutchmc.rconsole.gson.in.BasicPacketIn;
 import nl.thedutchmc.rconsole.gson.in.LoginPacketIn;
 import nl.thedutchmc.rconsole.gson.in.SendCommandPacketIn;
@@ -31,7 +34,6 @@ public class TcpListener implements Runnable {
 	private final RConsole plugin;
 	
 	private static final Gson GSON = new Gson();
-	
 	
 	public TcpListener(ServerSocket serverSocket, TokenObject[] validTokens, TcpServer tcpServer, ReadConsole readConsoleFeature, RConsole plugin) {
 		this.serverSocket = serverSocket;
@@ -72,7 +74,7 @@ public class TcpListener implements Runnable {
 				PrintWriter out = new PrintWriter(this.client.getSocket().getOutputStream());
 				BufferedReader in = new BufferedReader(new InputStreamReader(this.client.getSocket().getInputStream()));
 				String inputLine;
-				while((inputLine = in.readLine()) != null) {					
+				while(!this.client.getSocket().isClosed() && (inputLine = in.readLine()) != null) {					
 					try {
 						RConsole.logDebug(String.format("Received message '%s' from client '%s'", inputLine, this.client.getSocket().getInetAddress().toString()));
 						
@@ -131,9 +133,10 @@ public class TcpListener implements Runnable {
 							}
 							
 							this.client.setName(loginPacket.getName());
+							this.client.setScopes(loginPacket.getScopes());
 							
 							{
-								TcpListener.this.tcpServer.addSignedInClient(client);
+								TcpListener.this.tcpServer.addSignedInClient(this.client);
 								BasicPacketOut loginSuccessPacketOut = new BasicPacketOut(200);
 								out.println(GSON.toJson(loginSuccessPacketOut));
 								out.flush();
@@ -144,16 +147,30 @@ public class TcpListener implements Runnable {
 							SubscribePacketIn subscribePacketIn = GSON.fromJson(inputLine, SubscribePacketIn.class);
 							
 							//Check if the client is signed in
-							if(!TcpListener.this.tcpServer.isClientSignedIn(client)) {
+							if(!TcpListener.this.tcpServer.isClientSignedIn(this.client)) {
 								MessagedPacketOut messagedPacketOut = new MessagedPacketOut(401, "Client is not signed in");
 								out.println(GSON.toJson(messagedPacketOut));
 								out.flush();
 								continue;
 							}
 							
+							if(subscribePacketIn.getSubscribeType() == null) {
+								MessagedPacketOut invalidPacketOut = new MessagedPacketOut(400, "Required field 'subscribeType' is missing");
+								out.println(GSON.toJson(invalidPacketOut));
+								out.flush();
+								continue;
+							}
+							
 							switch(subscribePacketIn.getSubscribeType()) {
 							case CONSOLE_OUTPUT:
-								if(TcpListener.this.readConsoleFeature.isSubscribed(client)) {
+								if(!Arrays.asList(this.client.getScopes()).contains(Scope.READ_CONSOLE)) {
+									MessagedPacketOut messagedPacketOut = new MessagedPacketOut(401, "Missing scope 'READ_CONSOLE'");
+									out.println(GSON.toJson(messagedPacketOut));
+									out.flush();
+									continue;
+								}
+								
+								if(TcpListener.this.readConsoleFeature.isSubscribed(this.client)) {
 									MessagedPacketOut messagedPacketOut = new MessagedPacketOut(400, "Client is already subscribed");
 									out.println(GSON.toJson(messagedPacketOut));
 									out.flush();
@@ -161,7 +178,7 @@ public class TcpListener implements Runnable {
 								}
 								
 								{
-									TcpListener.this.readConsoleFeature.subscribeClient(client);
+									TcpListener.this.readConsoleFeature.subscribeClient(this.client);
 									BasicPacketOut loginSuccessPacketOut = new BasicPacketOut(200);
 									out.println(GSON.toJson(loginSuccessPacketOut));
 									out.flush();
@@ -177,6 +194,20 @@ public class TcpListener implements Runnable {
 							if(!TcpListener.this.tcpServer.isClientSignedIn(client)) {
 								MessagedPacketOut messagedPacketOut = new MessagedPacketOut(401, "Client is not signed in");
 								out.println(GSON.toJson(messagedPacketOut));
+								out.flush();
+								continue;
+							}
+							
+							if(!Arrays.asList(this.client.getScopes()).contains(Scope.SEND_COMMAND)) {
+								MessagedPacketOut messagedPacketOut = new MessagedPacketOut(401, "Missing scope 'SEND_COMMAND'");
+								out.println(GSON.toJson(messagedPacketOut));
+								out.flush();
+								continue;
+							}
+							
+							if(commandPacketIn.getCommand() == null) {
+								MessagedPacketOut invalidPacketOut = new MessagedPacketOut(400, "Required field 'command' is missing");
+								out.println(GSON.toJson(invalidPacketOut));
 								out.flush();
 								continue;
 							}
@@ -201,6 +232,8 @@ public class TcpListener implements Runnable {
 						continue;
 					}
 				}
+			} catch(SocketException e) {
+				//TODO probably shouldn't be just suppressing all socket exceptions.
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
