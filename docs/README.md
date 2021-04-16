@@ -1,6 +1,8 @@
 # API Documentation
 Communication happens over TCP sockets. Encoding is UTF-8, lines are terminated with a line seperator (Platform dependent)
 
+>Tip: If you want to play around with the API, you can use Hercules' TCP Client to do so easily
+
 ### Signin
 The first thing you should do after connecting is signing in:
 ```json
