@@ -8,7 +8,6 @@ plugins {
 allprojects {
 
 	version = pluginVersion
-	group = pluginGroup	
 
 	sourceCompatibility = 1.11
 	targetCompatibility = 1.11
@@ -22,19 +21,17 @@ allprojects {
 	processResources {
     	from(sourceSets.main.resources.srcDirs) {
         	filter ReplaceTokens, tokens: [version: version]
-			filter ReplaceTokens, tokens: [name: pluginName]
-			filter ReplaceTokens, tokens: [mainClassName: mainClassName]
-			filter ReplaceTokens, tokens: [groupId: pluginGroup]
-			filter ReplaceTokens, tokens: [author: pluginAuthor]
-			filter ReplaceTokens, tokens: [apiVersion: pluginApiVersion]
 		}
     }
 }
 
 dependencies {
-	
 	//Spigot API
-	compileOnly 'org.spigotmc:spigot-api:1.16.4-R0.1-SNAPSHOT'
+	compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+	
+	compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
+	
 }
 
 task testJar(type: Jar) {

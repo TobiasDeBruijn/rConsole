@@ -1,1 +1,8 @@
-#Empty configuration file. you should add stuff here yourself or remove it :)
+debugMode: true
+listenPort: 8080
+tokens:
+- name: TEST
+  token: ABC
+  scopes:
+  - READ_CONSOLE
+  - SEND_COMMAND
