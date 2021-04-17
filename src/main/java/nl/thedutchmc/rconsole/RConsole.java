@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.gson.Gson;
 
@@ -36,7 +37,16 @@ public class RConsole extends JavaPlugin {
 		if(config.getConfig().isUseIntegratedDashboardServer()) {
 			RConsole.logInfo("Config option 'useIntegratedDashboardServer' is set to true. Loading library and starting dashboard.");
 			this.dashboardServer = new DashboardServer();
-			this.dashboardServer.startDashboardServer(this.getDataFolder().getAbsolutePath());
+
+			class DashboardServerRunnable implements Runnable {
+				@Override
+				public void run() {
+					RConsole.this.dashboardServer.startDashboardServer(RConsole.this.getDataFolder().getAbsolutePath());
+				}
+			}
+			
+			new Thread(new DashboardServerRunnable(), "rConsole-librconsole-Thread").start();
+			
 		} else {
 			RConsole.logInfo("Config option 'useIntegratedDashboardServer' is set to false. Skipping.");
 		}
