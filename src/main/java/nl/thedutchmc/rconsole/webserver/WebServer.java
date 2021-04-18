@@ -24,12 +24,11 @@ public class WebServer {
 			} else if(osString.contains("windows")) {
 				nativeLibraryName = "/x86_64/windows/librconsole.dll";
 			} else {
-				RConsole.logWarn(String.format("You are running on an OS not supported by rConsole (%s). The build-in webserver for the web interface will not work.", osString));
+				RConsole.logWarn(String.format("You are running on an OS not supported by rConsole (%s). The built-in webserver will not work.", osString));
 				break saveNativeLib;
 			}
 		
 			URL libUrl = WebServer.class.getResource(nativeLibraryName);
-			RConsole.logDebug(libUrl.getPath());
 			File tmpDir;
 			try {
 				tmpDir = Files.createTempDirectory("librconsole").toFile();
@@ -41,10 +40,7 @@ public class WebServer {
 			}
 			
 			String[] nativeLibNameParts = nativeLibraryName.split(Pattern.quote("/"));
-			String fileName = nativeLibNameParts[nativeLibNameParts.length-1];
-			RConsole.logDebug("Filename: " + fileName);
-			
-			File libTmpFile = new File(tmpDir, fileName);
+			File libTmpFile = new File(tmpDir, nativeLibNameParts[nativeLibNameParts.length-1]);
 			libTmpFile.deleteOnExit();
 			
 			try {
@@ -84,5 +80,13 @@ public class WebServer {
 		
 		File librconsoleConfigFile = new File(librconsoleConfigFolder, "config.yml");
 		Native.startWebServer(librconsoleConfigFile.getAbsolutePath());
+	}
+	
+	public void log(String log, long timestamp, String level, String thread) {
+		if(!LIB_LOADED) {
+			return;
+		}
+		
+		Native.appendConsoleLog(log, timestamp, level, thread);
 	}
 }

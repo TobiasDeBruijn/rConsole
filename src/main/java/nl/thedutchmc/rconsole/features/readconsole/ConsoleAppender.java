@@ -18,10 +18,11 @@ public class ConsoleAppender extends AbstractAppender {
 	public void append(LogEvent event) {
 		LogEvent eventImmutable = event.toImmutable();
 		
-		this.readConsole.send(
-				eventImmutable.getMessage().getFormattedMessage(),
-				eventImmutable.getTimeMillis() / 1000,
-				eventImmutable.getLevel().name(),
-				eventImmutable.getThreadName());
+		final String message = eventImmutable.getMessage().getFormattedMessage();
+		final long timestamp = eventImmutable.getTimeMillis() / 1000;
+		final String level = eventImmutable.getLevel().name();
+		final String thread = eventImmutable.getThreadName();
+		this.readConsole.sendToLibRconsole(message, timestamp, level, thread);
+		this.readConsole.send(message, timestamp, level, thread);
 	}	
 }

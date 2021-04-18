@@ -7,7 +7,6 @@ import java.util.List;
 
 import nl.thedutchmc.rconsole.RConsole;
 import nl.thedutchmc.rconsole.config.gson.TokenObject;
-import nl.thedutchmc.rconsole.features.readconsole.ReadConsole;
 
 public class TcpServer implements Runnable {
 
@@ -16,7 +15,6 @@ public class TcpServer implements Runnable {
 	private final int port;
 	private final TokenObject[] validTokens;
 	private final RConsole plugin;
-	private final ReadConsole readConsoleFeature = new ReadConsole();
 	private final List<TcpClient> signedInClients = new ArrayList<>();
 		
 	private ServerSocket serverSocket;
@@ -34,7 +32,7 @@ public class TcpServer implements Runnable {
 			RConsole.logDebug("Started TCP Server on port " + this.port);
 			
 			for(int i = 0; i < LISTENERS; i++) {
-				new Thread(new TcpListener(this.serverSocket, this.validTokens, this, this.readConsoleFeature, this.plugin), "rConsole-TcpListener-Worker-" + i).start();
+				new Thread(new TcpListener(this.serverSocket, this.validTokens, this, this.plugin.readConsoleFeature, this.plugin), "rConsole-TcpListener-Worker-" + i).start();
 			}
 		} catch(IOException e) {
 			

@@ -46,11 +46,14 @@ To build this plugin you need a couple of dependencies. These are the dependenci
 Rustup toolchains:
 - `stable-x86_64-pc-windows-gnu`
 - `stable-x86_64-unknown-linux-gnu`
+Rustup targets:
+- `x86_64-unknown-linux-gnu`
+- `x86_64-pc-windows-gnu`
 
 To then build the project all you'd need to do is run `make`. This will build a `releasejar`, to create a `testjar` run `make testjar`
 
-To get the headers for the native function, for if you want the signature again, or something :)
+To get the headers for the native function, for if you want the signature again, or something :)  
 ``javac -h . ./src/main/java/nl/thedutchmc/rconsole/webserver/Native.java``
 
-To get the signature from other methods, if you want to access them from native code:
+To get the signature from other methods, if you want to access them from native code:  
 ``javap -s ./build/classes/java/main/nl/thedutchmc/rconsole/<Path to the class>``

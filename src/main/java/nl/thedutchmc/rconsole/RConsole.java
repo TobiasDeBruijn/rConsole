@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.google.gson.Gson;
 
 import nl.thedutchmc.rconsole.config.Configuration;
+import nl.thedutchmc.rconsole.features.readconsole.ReadConsole;
 import nl.thedutchmc.rconsole.gson.out.ServerShutdownPacket;
 import nl.thedutchmc.rconsole.tcp.TcpClient;
 import nl.thedutchmc.rconsole.tcp.TcpServer;
@@ -20,8 +21,9 @@ public class RConsole extends JavaPlugin {
 	private static volatile boolean DEBUG = false;
 	private static volatile boolean IS_RUNNING = true;
 	
+	public ReadConsole readConsoleFeature;
 	private TcpServer tcpServer;
-	private WebServer dashboardServer;
+	private WebServer nativeWebServer = null;
 	
 	@Override
 	public void onEnable() {
@@ -32,23 +34,24 @@ public class RConsole extends JavaPlugin {
 		
 		this.tcpServer = new TcpServer(config.getConfig().getListenPort(), config.getConfig().getTokens(), this);
 		new Thread(tcpServer, "rConsole-TCPServer-Thread").start();
-		
+				
 		if(config.getConfig().isUseWebServer()) {
 			RConsole.logInfo("Config option 'useWebServer' is set to true. Loading library and starting webserver.");
-			this.dashboardServer = new WebServer();
-
-			class DashboardServerRunnable implements Runnable {
+			this.nativeWebServer = new WebServer();
+			
+			new Thread(new Runnable() {
+				
 				@Override
 				public void run() {
-					RConsole.this.dashboardServer.startWebServer(RConsole.this.getDataFolder().getAbsolutePath());
+					RConsole.this.nativeWebServer.startWebServer(RConsole.this.getDataFolder().getAbsolutePath());
 				}
-			}
-			
-			new Thread(new DashboardServerRunnable(), "rConsole-librconsole-Thread").start();
+			}, "rConsole-librconsole-Thread").start();
 			
 		} else {
-			RConsole.logInfo("Config option 'v' is set to false. Skipping.");
+			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}
+		
+		this.readConsoleFeature = new ReadConsole(this.nativeWebServer);
 	}
 	
 	@Override

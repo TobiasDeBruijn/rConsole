@@ -73,6 +73,5 @@ task copyNativeBinaries(type: Copy) {
 	
 	from "$rootDir/librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll"
 	into "$buildDir/resources/main/x86_64/windows/"
-	
 }
 
