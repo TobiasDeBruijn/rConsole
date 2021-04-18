@@ -1,24 +1,51 @@
 use jni::JNIEnv;
-use jni::objects::{JClass, JString, JValue, JObject};
+use jni::objects::{JString, JValue, JObject, JClass};
 use crate::config::Config;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use std::cell::RefCell;
 
+lazy_static! {
+    pub static ref LOG_BUFFER: Arc<Mutex<RefCell<Vec<String>>>> = Arc::new(Mutex::new(RefCell::new(Vec::new())));
+}
+
+/**
+Log to the INFO level
+*/
 pub fn log_info<'a>(env: &'a JNIEnv, log: &str) {
+    /*
+    Calls the method logInfo(Object log) in nl.thedutchmc.rconsole.RConsole
+    */
     let log_str_formatted = format!("[librconsole] {}", log);
     let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logInfo", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
 }
 
+/**
+Log to the WARN level
+*/
 pub fn log_warn<'a>(env: &'a JNIEnv, log: &str) {
+    /*
+    Calls the method logWarn(Object log) in nl.thedutchmc.rconsole.RConsole
+    */
     let log_str_formatted = format!("[librconsole] {}", log);
     let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logWarn", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
 }
 
+/**
+Log to the DEBUG level
+*/
 pub fn log_debug<'a>(env: &'a JNIEnv, log: &str) {
+    /*
+    Calls the method logDebug(Object log) in nl.thedutchmc.rconsole.RConsole
+    This will only output to the console if IS_DEBUG is set (Java code)
+    */
     let log_str_formatted = format!("[librconsole] {}", log);
     let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logDebug", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
 }
 
+/**
+Convert a &str to a JValue
+*/
 fn str_to_jvalue<'a>(env: &'a JNIEnv, str: &str) -> JValue<'a> {
     let log_jstring = env.new_string(str).unwrap();
     let log_jobject = JObject::from(log_jstring);
@@ -27,8 +54,13 @@ fn str_to_jvalue<'a>(env: &'a JNIEnv, str: &str) -> JValue<'a> {
     log_jvalue
 }
 
+/**
+ * Class:     nl.thedutchmc.rconsole.webserver.Native
+ * Method:    startWebServer
+ * Signature: (Ljava/lang/String;)V
+ */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_dashboard_Native_nativeStartDashboardServer(env: JNIEnv, object: JObject, config_folder_jstring: JString) {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServer(env: JNIEnv, _class: JClass, config_folder_jstring: JString) {
     let config_folder: String = env.get_string(config_folder_jstring).expect("Unable to get String from JString 'config_folder_jstring'").into();
 
     log_info(&env, "Loading library librconsole");
@@ -41,22 +73,23 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_dashboard_Native_nativeStartD
     }
     let config = config_wrapped.unwrap();
 
-    let array_list_class = env.find_class("java/util/ArrayList").unwrap();
-    let array_list_constructor = env.get_method_id(array_list_class, "<init>", "(I)V");
-
-    env.call_method(object, "setLogBuffer", "([Ljava/lang/String;)V", &[jval]);
-
     let jvm = Arc::new(env.get_java_vm().unwrap());
     let _ = crate::webserver::start(config, jvm);
 }
 
+/**
+ * Class:     nl.thedutchmc.rconsole.webserver.Native
+ * Method:    appendConsoleLog
+ * Signature: (Ljava/lang/String;)V
+ */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_dashboard_Native_nativeStopDashboardServer(_env: JNIEnv, _object: JObject) {
-
-}
-
-#[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_dashboard_Native_appendConsoleLog(env: JNIEnv, object: JObject, log_jstring: JString) {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_appendConsoleLog(env: JNIEnv, _class: JClass, log_jstring: JString) {
     let log: String = env.get_string(log_jstring).expect("Unable to get String from JString 'log_jstring'").into();
-    log_buffer.get_mut().unwrap().push(log);
+
+    let n = LOG_BUFFER.lock().unwrap();
+    n.take().push(log);
+
+    for i in n.take().iter() {
+        log_info(&env, i);
+    }
 }

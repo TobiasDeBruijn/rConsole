@@ -1,4 +1,4 @@
-package nl.thedutchmc.rconsole.dashboard;
+package nl.thedutchmc.rconsole.webserver;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,14 +10,12 @@ import java.util.regex.Pattern;
 import nl.thedutchmc.rconsole.RConsole;
 import nl.thedutchmc.rconsole.Util;
 
-public class DashboardServer {
+public class WebServer {
 
 	private static boolean LIB_LOADED = false;
-	private Native nativeObj;
 	
 	static {
 		saveNativeLib: {
-			/*
 			String osString = System.getProperty("os.name").toLowerCase();
 			String nativeLibraryName;
 			
@@ -30,7 +28,7 @@ public class DashboardServer {
 				break saveNativeLib;
 			}
 		
-			URL libUrl = DashboardServer.class.getResource(nativeLibraryName);
+			URL libUrl = WebServer.class.getResource(nativeLibraryName);
 			RConsole.logDebug(libUrl.getPath());
 			File tmpDir;
 			try {
@@ -67,17 +65,13 @@ public class DashboardServer {
 				tmpDir.delete();
 				break saveNativeLib;
 			}
-			*/
-			try {
-				System.load("/tmp/librconsole.so");
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
+
+			
 			LIB_LOADED = true;
 		}
 	}
 	
-	public void startDashboardServer(String configFolder) {
+	public void startWebServer(String configFolder) {
 		if(!LIB_LOADED) {
 			RConsole.logWarn("Unable to start Dashboard server because the native library 'librconsole' is not loaded");
 			return;
@@ -89,15 +83,6 @@ public class DashboardServer {
 		}
 		
 		File librconsoleConfigFile = new File(librconsoleConfigFolder, "config.yml");
-		this.nativeObj = new Native();
-		this.nativeObj.nativeStartDashboardServer(librconsoleConfigFile.getAbsolutePath());
-	}
-	
-	public void stopDashboardServer() {
-		if(!LIB_LOADED) {
-			return;
-		}
-		
-		this.nativeObj.nativeStopDashboardServer();
+		Native.startWebServer(librconsoleConfigFile.getAbsolutePath());
 	}
 }

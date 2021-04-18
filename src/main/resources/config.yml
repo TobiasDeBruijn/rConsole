@@ -1,6 +1,6 @@
 debugMode: true
 listenPort: 8080
-useIntegratedDashboardServer: false
+useWebServer: false
 tokens:
 - name: TEST
   token: ABC
