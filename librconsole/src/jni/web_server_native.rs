@@ -54,9 +54,15 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
     let (tx , rx): (Sender<ConsoleLogItem>, Receiver<ConsoleLogItem>) = std::sync::mpsc::channel();
 
     //Create the 'users' table if it doesn't exist in the database
-    let sql_create_table = database.connection.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, username TEXT NOT NULL, hash TEXT NOT NULL, salt TEXT NOT NULL)", named_params! {});
-    if sql_create_table.is_err() {
-        log_warn(&env, &format!("An error occurred while creating the 'users' table: {:?}", sql_create_table.err().unwrap()));
+    let sql_create_user_table = database.connection.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, username TEXT NOT NULL, hash TEXT NOT NULL, salt TEXT NOT NULL)", named_params! {});
+    if sql_create_user_table.is_err() {
+        log_warn(&env, &format!("An error occurred while creating the 'users' table: {:?}", sql_create_user_table.err().unwrap()));
+        return;
+    }
+
+    let sql_create_session_table = database.connection.execute("CREATE TABLE IF NOT EXISTS sessions (session_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, expiry INTEGER NOT NULL)", named_params! {});
+    if sql_create_session_table.is_err() {
+        log_warn(&env, &format!("An error occurred while creating the 'sessions' table: {:?}", sql_create_session_table.err().unwrap()));
         return;
     }
 
@@ -70,7 +76,7 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
 
     //Start the HTTP server
     std::thread::spawn(move || {
-        let _ = crate::webserver::start(config, tx);
+        let _ = crate::webserver::start(config, tx, database_file_path);
     });
 
     //Start listening for logging 'packets' on the created Receiver Channel

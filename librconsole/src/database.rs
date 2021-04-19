@@ -2,7 +2,7 @@ use rusqlite::Connection;
 use std::path::PathBuf;
 
 pub struct Database {
-    pub connection: Connection
+    pub connection: Connection,
 }
 
 impl Database {

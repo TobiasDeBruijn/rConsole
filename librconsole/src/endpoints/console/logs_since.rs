@@ -2,11 +2,13 @@ use actix_web::{web, post, HttpResponse};
 use serde::{Deserialize, Serialize};
 use crate::endpoints::console::CombinedLogEntry;
 use crate::jni::logging::{log, LogLevel};
+use crate::database::Database;
+use rusqlite::named_params;
+use std::path::PathBuf;
 
 #[derive(Deserialize)]
 pub struct LogRequest {
-    key:        String,
-    name:       String,
+    session_id: String,
     since:      String
 }
 
@@ -17,22 +19,21 @@ pub struct LogResponse {
 }
 
 #[post("/console/since")]
-pub async fn post_new(data: web::Data<crate::webserver::AppData>, form: web::Form<LogRequest>) -> HttpResponse {
+pub async fn post_logs_since(data: web::Data<crate::webserver::AppData>, form: web::Form<LogRequest>) -> HttpResponse {
+    let db = Database::new(PathBuf::from(data.db_path.clone())).unwrap();
+    let sql_check_session =  db.connection.execute("SELECT 1 FROM sessions WHERE session_id = :session_id", named_params! {
+        ":session_id": &form.session_id
+    });
 
-    //Check if the provided key/name pair exists
-    let mut has_valid_key: bool = false;
-    for key_item in &data.config.keys {
-        if key_item.name == form.name && key_item.key == form.key {
-            has_valid_key = true;
-        }
+    if sql_check_session.is_err() {
+        let tx = data.log_tx.lock().unwrap();
+        log(&tx, LogLevel::Warn, &format!("An error occurred while verifying a session_id: {:?}", sql_check_session.err().unwrap()));
+
+        return HttpResponse::InternalServerError().finish();
     }
 
-    //If the provided key wasn't valid, return a 401
-    if !has_valid_key {
-        let tx = data.log_tx.lock().unwrap();
-        log(&tx, LogLevel::Warn, &format!("A request was received with invalid credentials! The credentials were as follows: name = '{}', key = '{}'", form.name, form.key));
-
-        return HttpResponse::Ok().json(LogResponse { status: 401, logs: None });
+    if sql_check_session.unwrap() != 1 {
+        return HttpResponse::Ok().json(LogResponse { status: 401, logs: None});
     }
 
     let since_wrapped = form.since.parse::<u32>();

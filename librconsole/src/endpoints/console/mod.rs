@@ -1,8 +1,8 @@
 use crate::LogEntry;
 use serde::Serialize;
 
-pub mod get_all_logs;
-pub mod get_new;
+pub mod all_logs;
+pub mod logs_since;
 
 #[derive(Serialize)]
 pub struct CombinedLogEntry {

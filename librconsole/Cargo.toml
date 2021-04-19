@@ -22,3 +22,4 @@ rusqlite = { version = "0.25.0", features = ["bundled"]}
 bcrypt = "0.9.0"
 sha2 = "0.9.3"
 base64 = "0.13.0"
+chrono = "0.4.19"
