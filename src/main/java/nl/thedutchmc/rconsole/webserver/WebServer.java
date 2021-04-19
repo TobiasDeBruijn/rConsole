@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import nl.thedutchmc.rconsole.RConsole;
+import nl.thedutchmc.rconsole.annotations.Nullable;
 import nl.thedutchmc.rconsole.util.Util;
 
 public class WebServer {
@@ -99,6 +101,7 @@ public class WebServer {
 		Native.addUser(username, password);
 	}
 	
+	@Nullable
 	public Boolean delUser(String username) {
 		if(!LIB_LOADED) {
 			return null;
@@ -107,11 +110,30 @@ public class WebServer {
 		return Native.delUser(username);
 	}
 	
+	@Nullable
 	public String[] listUsers() {
 		if(!LIB_LOADED) {
 			return null;
 		}
 		
 		return Native.listUsers();
+	}
+	
+	@Nullable
+	public HashMap<String, String[]> getUserSessions() {
+		if(!LIB_LOADED) {
+			return null;
+		}
+		
+		return Native.getUserSessions();
+	}
+	
+	@Nullable
+	public Boolean delSession(String sessionId) {
+		if(!LIB_LOADED) {
+			return null;
+		}
+		
+		return Native.delSession(sessionId);
 	}
 }

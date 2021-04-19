@@ -3,13 +3,14 @@ use crate::config::Config;
 use crate::LogEntry;
 
 use jni::JNIEnv;
-use jni::objects::{JString, JClass};
-use jni::sys::{jlong, jboolean, jobjectArray};
+use jni::objects::{JString, JClass, JValue, JObject};
+use jni::sys::{jlong, jboolean, jobjectArray, jobject};
 use std::path::PathBuf;
 use std::sync::mpsc::{Sender, Receiver};
 use rand::Rng;
 use sha2::{Sha512Trunc256, Digest};
-use rusqlite::{named_params, OptionalExtension};
+use rusqlite::{named_params, OptionalExtension, Connection};
+use std::collections::HashMap;
 
 /**
  * Class:     nl.thedutchmc.rconsole.webserver.Native
@@ -156,6 +157,8 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_addUser(env:
 
     if sql_insert_result.is_err() {
         log_warn(&env, &format!("An error occurred while inserting a new user into the database: {:?}", sql_insert_result.err().unwrap()));
+        database_locked.set(Some(database));
+        return;
     }
 
     //Set the database back, since take() removes the value
@@ -180,12 +183,14 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delUser(env:
 
     if sql_get_users_wrapped.is_err() {
         log_warn(&env, &format!("An error occurred while retrieving users from the 'users' table: {:?}", sql_get_users_wrapped.err().unwrap()));
+        database_lock.set(Some(database));
         return jboolean::from(false);
     }
 
     let sql_get_users = sql_get_users_wrapped.unwrap();
     if sql_get_users.is_none() {
         log_warn(&env, &format!("User tried to delete user '{}', this user does not exist.", &username));
+        database_lock.set(Some(database));
         return jboolean::from(false);
     }
 
@@ -197,6 +202,7 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delUser(env:
 
     if sql_drop_user.is_err() {
         log_warn(&env, &format!("An error occurred while deleting user '{}': {:?}", &username, sql_drop_user.err().unwrap()));
+        database_lock.set(Some(database));
         return jboolean::from(false);
     }
 
@@ -206,6 +212,11 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delUser(env:
     jboolean::from(true)
 }
 
+/**
+ * Class:     nl_thedutchmc_rconsole_webserver_Native
+ * Method:    listUsers() -> String[]
+ * Signature: ()[Ljava/lang/String;
+ */
 #[no_mangle]
 pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_listUsers(env: JNIEnv, _class: JClass) -> jobjectArray {
     let database_lock = crate::DATABASE.lock().unwrap();
@@ -219,6 +230,8 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_listUsers(en
 
         if sql_get_users.is_err() {
             log_warn(&env, &format!("An error occurred while getting all users: {:?}", sql_get_users.err().unwrap()));
+            drop(stmt);
+            database_lock.set(Some(database));
             return env.new_object_array(0, jstring_class, env.new_string("").unwrap()).unwrap();
         }
 
@@ -239,4 +252,151 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_listUsers(en
     database_lock.set(Some(database));
 
     result
+}
+
+/**
+ * Class:     nl_thedutchmc_rconsole_webserver_Native
+ * Method:    getUserSessions() -> HashMap<String, String[]>
+ * Signature: ()Ljava/util/HashMap;
+ */
+#[no_mangle]
+pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_getUserSessions(env: JNIEnv, _class: JClass) -> jobject {
+
+    let mut sessions_users_map: HashMap<String, Vec<String>> = HashMap::new();
+    {
+        let database_lock = crate::DATABASE.lock().unwrap();
+        let database = database_lock.take().unwrap();
+
+        let sql_get_all_users_result_fn = |db: &Connection| -> Result<HashMap<String, String>, ()> {
+            let mut stmt_get_all_users = db.prepare("SELECT user_id, username FROM users").unwrap();
+            let sql_get_all_users_wrapped = stmt_get_all_users.query(named_params! {});
+
+
+            if sql_get_all_users_wrapped.is_err() {
+                log_warn(&env, &format!("An error occurred retrieving users from the database: {:?}", sql_get_all_users_wrapped.err().unwrap()));
+                return Err(());
+            }
+
+            let mut users_map: HashMap<String, String> = HashMap::new();
+
+            let mut sql_get_all_users = sql_get_all_users_wrapped.unwrap();
+            while let Some(row) = sql_get_all_users.next().unwrap() {
+                users_map.insert(row.get(0).unwrap(), row.get(1).unwrap());
+            }
+
+            Ok(users_map)
+        };
+
+        let sql_get_all_users_result = sql_get_all_users_result_fn(&database.connection);
+        if sql_get_all_users_result.is_err() {
+            database_lock.set(Some(database));
+            return *JObject::null();
+        }
+
+        let sql_get_user_sessions_fn = |db: &Connection, user_id: &String| -> Result<Vec<String>, ()> {
+            let mut stmt_get_user_sessions = db.prepare("SELECT session_id FROM sessions WHERE user_id = :user_id").unwrap();
+            let sql_get_user_sessions_wrapped = stmt_get_user_sessions.query(named_params! {
+                ":user_id": &user_id
+            });
+
+            if sql_get_user_sessions_wrapped.is_err() {
+                log_warn(&env, &format!("An error occurred retrieving sessions for the user '{}': {:?}", &user_id, sql_get_user_sessions_wrapped.err().unwrap()));
+                return Err(())
+            }
+
+            let mut sessions_vec: Vec<String> = vec![];
+            let mut sql_get_users_sessions = sql_get_user_sessions_wrapped.unwrap();
+            while let Some(row) = sql_get_users_sessions.next().unwrap() {
+                sessions_vec.push(row.get(0).unwrap());
+            }
+
+            Ok(sessions_vec)
+        };
+
+        //Fetch all sessions for each user
+        let users_map = sql_get_all_users_result.unwrap();
+        for (user_id, username) in &users_map {
+            let sql_get_user_sessions = sql_get_user_sessions_fn(&database.connection, &user_id);
+            if sql_get_user_sessions.is_err() {
+                database_lock.set(Some(database));
+                return *JObject::null();
+
+            }
+
+            sessions_users_map.insert(username.clone(), sql_get_user_sessions.unwrap());
+        }
+
+        database_lock.set(Some(database));
+    }
+
+    //Convert the HashMap<String, Vec<String>> to a jobject
+    let hashmap_jclass = env.find_class("java/util/HashMap").unwrap();
+    let jstring_class = env.find_class("java/lang/String").unwrap();
+
+    let hashmap_jobject = env.new_object(hashmap_jclass, "(I)V", &[JValue::Int(sessions_users_map.len() as i32)]).unwrap();
+
+    for (k, v) in sessions_users_map {
+        let sessions_string_arr_jobject = env.new_object_array(v.len() as i32, jstring_class, env.new_string("").unwrap()).unwrap();
+
+        for i in 0..v.len() {
+            let _ = env.set_object_array_element(sessions_string_arr_jobject, i as i32, env.new_string(v.get(i).unwrap()).unwrap());
+        }
+
+        let _ = env.call_method(hashmap_jobject, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", &[JValue::from(env.new_string(&k).unwrap()), JValue::from(sessions_string_arr_jobject)]);
+    }
+
+    *hashmap_jobject
+}
+
+/**
+ * Class:     nl_thedutchmc_rconsole_webserver_Native
+ * Method:    delSession(String sessionId) -> void
+ * Signature: (Ljava/lang/String;)Ljava/lang/Boolean;
+ */
+#[no_mangle]
+pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delSession(env: JNIEnv, _class: JClass, session_id_jstring: JString) -> jobject {
+    let session_id: String = env.get_string(session_id_jstring).expect("Unable to get String from JString 'session_id_jstring'").into();
+
+    let database_lock = crate::DATABASE.lock().unwrap();
+    let database = database_lock.take().unwrap();
+
+    let sql_session_exists: rusqlite::Result<Option<String>> = database.connection.query_row("SELECT user_id FROM sessions WHERE session_id = :session_id", named_params! {
+        ":session_id": &session_id
+    }, |row| row.get(0)).optional();
+
+    if sql_session_exists.is_err() {
+        log_warn(&env, &format!("An error occurred while checking if a session_id exists: {:?}", sql_session_exists.err().unwrap()));
+        database_lock.set(Some(database));
+        return *JObject::null();
+    }
+
+    if sql_session_exists.unwrap().is_none() {
+        log_warn(&env, &format!("The user tried to delete a session_id which doesn't exist! (session_id: '{}')", &session_id));
+        database_lock.set(Some(database));
+        return *bool_to_java_Boolean(&env, false).l().unwrap();
+    }
+
+    let sql_delete_session_id = database.connection.execute("DELETE FROM sessions WHERE session_id = :session_id", named_params! {
+        ":session_id": &session_id
+    });
+
+    if sql_delete_session_id.is_err() {
+        log_warn(&env, &format!("An error occurred while deleting a session_id from the sessions table: {:?}", sql_delete_session_id.err().unwrap()));
+        database_lock.set(Some(database));
+        return *JObject::null();
+    }
+
+    database_lock.set(Some(database));
+
+    *bool_to_java_Boolean(&env, true).l().unwrap()
+
+}
+
+/**
+Convert a bool to a java.lang.Boolean
+*/
+#[allow(non_snake_case)]
+fn bool_to_java_Boolean<'a>(env: &'a JNIEnv, v: bool) -> JValue<'a> {
+    let boolean_class = env.find_class("java/lang/Boolean").unwrap();
+    env.call_static_method(boolean_class, "valueOf", "(Z)Ljava/lang/Boolean;", &[JValue::from(v)]).expect("Unable to convert bool to java.lang.Boolean")
 }

@@ -10,7 +10,9 @@ import com.google.gson.Gson;
 
 import nl.thedutchmc.rconsole.command.CommandLoader;
 import nl.thedutchmc.rconsole.command.executor.AddUserExecutor;
+import nl.thedutchmc.rconsole.command.executor.DelSessionExecutor;
 import nl.thedutchmc.rconsole.command.executor.DelUserExecutor;
+import nl.thedutchmc.rconsole.command.executor.ListSessionsExecutor;
 import nl.thedutchmc.rconsole.command.executor.ListUsersExecutor;
 import nl.thedutchmc.rconsole.config.Configuration;
 import nl.thedutchmc.rconsole.features.readconsole.ReadConsole;
@@ -42,6 +44,8 @@ public class RConsole extends JavaPlugin {
 		new AddUserExecutor(this);
 		new DelUserExecutor(this);
 		new ListUsersExecutor(this);
+		new ListSessionsExecutor(this);
+		new DelSessionExecutor(this);
 		
 		this.tcpServer = new TcpServer(config.getConfig().getListenPort(), config.getConfig().getTokens(), this);
 		new Thread(tcpServer, "rConsole-TCPServer-Thread").start();
