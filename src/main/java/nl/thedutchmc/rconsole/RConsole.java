@@ -8,6 +8,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.gson.Gson;
 
+import nl.thedutchmc.rconsole.command.CommandLoader;
+import nl.thedutchmc.rconsole.command.executor.AddUserExecutor;
+import nl.thedutchmc.rconsole.command.executor.DelUserExecutor;
+import nl.thedutchmc.rconsole.command.executor.ListUsersExecutor;
 import nl.thedutchmc.rconsole.config.Configuration;
 import nl.thedutchmc.rconsole.features.readconsole.ReadConsole;
 import nl.thedutchmc.rconsole.gson.out.ServerShutdownPacket;
@@ -22,8 +26,10 @@ public class RConsole extends JavaPlugin {
 	private static volatile boolean IS_RUNNING = true;
 	
 	public ReadConsole readConsoleFeature;
+	public CommandLoader commandLoader;
+	public WebServer nativeWebServer;
+
 	private TcpServer tcpServer;
-	private WebServer nativeWebServer = null;
 	
 	@Override
 	public void onEnable() {
@@ -31,6 +37,11 @@ public class RConsole extends JavaPlugin {
 		
 		Configuration config = new Configuration(this);
 		RConsole.DEBUG = config.getConfig().isDebugMode();
+		
+		commandLoader = new CommandLoader(this);
+		new AddUserExecutor(this);
+		new DelUserExecutor(this);
+		new ListUsersExecutor(this);
 		
 		this.tcpServer = new TcpServer(config.getConfig().getListenPort(), config.getConfig().getTokens(), this);
 		new Thread(tcpServer, "rConsole-TCPServer-Thread").start();
@@ -46,7 +57,6 @@ public class RConsole extends JavaPlugin {
 					RConsole.this.nativeWebServer.startWebServer(RConsole.this.getDataFolder().getAbsolutePath());
 				}
 			}, "rConsole-librconsole-Thread").start();
-			
 		} else {
 			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}

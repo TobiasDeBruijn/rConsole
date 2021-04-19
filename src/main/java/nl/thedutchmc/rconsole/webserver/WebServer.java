@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.util.regex.Pattern;
 
 import nl.thedutchmc.rconsole.RConsole;
-import nl.thedutchmc.rconsole.Util;
+import nl.thedutchmc.rconsole.util.Util;
 
 public class WebServer {
 
@@ -79,7 +79,8 @@ public class WebServer {
 		}
 		
 		File librconsoleConfigFile = new File(librconsoleConfigFolder, "config.yml");
-		Native.startWebServer(librconsoleConfigFile.getAbsolutePath());
+		File librconsoleDatabaseFile = new File(librconsoleConfigFolder, "librconsole.db3");
+		Native.startWebServer(librconsoleConfigFile.getAbsolutePath(), librconsoleDatabaseFile.getAbsolutePath());
 	}
 	
 	public void log(String log, long timestamp, String level, String thread) {
@@ -88,5 +89,29 @@ public class WebServer {
 		}
 		
 		Native.appendConsoleLog(log, timestamp, level, thread);
+	}
+	
+	public void addUser(String username, String password) {
+		if(!LIB_LOADED) {
+			return;
+		}
+		
+		Native.addUser(username, password);
+	}
+	
+	public Boolean delUser(String username) {
+		if(!LIB_LOADED) {
+			return null;
+		}
+		
+		return Native.delUser(username);
+	}
+	
+	public String[] listUsers() {
+		if(!LIB_LOADED) {
+			return null;
+		}
+		
+		return Native.listUsers();
 	}
 }

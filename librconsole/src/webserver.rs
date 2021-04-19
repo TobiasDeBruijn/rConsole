@@ -7,16 +7,16 @@ use crate::jni::logging::ConsoleLogItem;
 
 #[derive(Clone)]
 pub struct AppData {
-    pub config:     Config,
-    pub log_tx:     Arc<Mutex<Sender<ConsoleLogItem>>>
+    pub log_tx:     Arc<Mutex<Sender<ConsoleLogItem>>>,
+    pub config:     Config
 }
 
 #[actix_web::main]
 pub async fn start(config: Config, tx: Sender<ConsoleLogItem>) -> std::io::Result<()>{
-    let port = config.clone().port;
+    let port = config.port;
     let data = AppData {
-        config,
-        log_tx: Arc::new(Mutex::new(tx))
+        log_tx: Arc::new(Mutex::new(tx)),
+        config
     };
 
     HttpServer::new(move || {

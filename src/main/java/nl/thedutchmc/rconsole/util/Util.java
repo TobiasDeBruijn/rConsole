@@ -1,4 +1,4 @@
-package nl.thedutchmc.rconsole;
+package nl.thedutchmc.rconsole.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
