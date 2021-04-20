@@ -33,7 +33,10 @@ dependencies {
 	
 	compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
     compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
-	
+}
+
+shadowJar {
+	include 'dist.zip'
 }
 
 task testJar(type: ShadowJar) {
@@ -75,7 +78,7 @@ task copyExternalDependencies() {
 
 task copyWebFiles(type: Copy) {
 	from "$rootDir/web/dist.zip"
-	into "$buildDir/resources/main/"	
+	into "$buildDir/resources/main/"
 }
 
 task copyLinuxLibrary(type: Copy) {

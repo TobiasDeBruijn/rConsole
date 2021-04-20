@@ -12,17 +12,17 @@ librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll: ${RUST_SOURCE_
 	cd librconsole; \
 		cargo build --lib --release --target x86_64-pc-windows-gnu
 
-testjar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
+testjar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew testjar
 
-releasejar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
+releasejar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew releasejar
 
-ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
+ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew ghActions
@@ -46,4 +46,3 @@ clean:
 		npm clean
 		rm -f dist.zip
 	./gradlew cleanEclipse clean
-	
