@@ -52,7 +52,7 @@ public class RConsole extends JavaPlugin {
 				
 		if(config.getConfig().isUseWebServer()) {
 			RConsole.logInfo("Config option 'useWebServer' is set to true. Loading library and starting webserver.");
-			this.nativeWebServer = new WebServer();
+			this.nativeWebServer = new WebServer(this);
 			
 			new Thread(new Runnable() {
 				

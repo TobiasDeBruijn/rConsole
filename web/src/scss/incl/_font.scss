@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&family=Roboto:wght@300;400&display=swap');
+
+$roboto:        'Roboto', sans-serif;
+$noto-sans:     'Noto Sans', sans-serif;
+
+@mixin set-font($font, $weight: 300) {
+    font-family: $font;
+    font-weight: $weight;
+}

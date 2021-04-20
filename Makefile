@@ -27,7 +27,23 @@ ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so li
 	rm -rf ./build/resources
 	./gradlew ghActions
 
+web/node_modules:
+	cd web; \
+		npm i
+
+web/dist/dist.js: web/node_modules
+	cd web; \
+		npx webpack
+
+web/dist.zip: web/dist/dist.js
+	cd web; \
+		zip -r dist.zip static/ dist/
+
 clean:
 	cd librconsole; \
 		cargo clean
+	cd web; \
+		npm clean
+		rm -f dist.zip
 	./gradlew cleanEclipse clean
+	

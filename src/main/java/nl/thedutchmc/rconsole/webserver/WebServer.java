@@ -15,6 +15,11 @@ import nl.thedutchmc.rconsole.util.Util;
 public class WebServer {
 
 	private static boolean LIB_LOADED = false;
+	private RConsole plugin;
+	
+	public WebServer(RConsole plugin) {
+		this.plugin = plugin;
+	}
 	
 	static {
 		saveNativeLib: {
@@ -82,7 +87,14 @@ public class WebServer {
 		
 		File librconsoleConfigFile = new File(librconsoleConfigFolder, "config.yml");
 		File librconsoleDatabaseFile = new File(librconsoleConfigFolder, "librconsole.db3");
-		Native.startWebServer(librconsoleConfigFile.getAbsolutePath(), librconsoleDatabaseFile.getAbsolutePath());
+		
+		File staticFilesFolder = new File(librconsoleConfigFolder + File.separator + "static");
+		if(!staticFilesFolder.exists()) {
+			staticFilesFolder.mkdirs();
+			
+		}
+		
+		Native.startWebServer(librconsoleConfigFile.getAbsolutePath(), librconsoleDatabaseFile.getAbsolutePath(), staticFilesFolder.getAbsolutePath());
 	}
 	
 	public void log(String log, long timestamp, String level, String thread) {

@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "ES6",
+        "lib": ["dom", "ES2020", "ES5"],
+        "sourceMap": false,
+        "removeComments": true,
+        "noImplicitAny": true
+    },
+
+    //This is just to get VSCode to shut up
+    //Since the inputs are handles via Webpack
+    "include": [
+        "src/ts/index.ts"
+    ]
+}

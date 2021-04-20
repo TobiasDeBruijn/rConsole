@@ -18,11 +18,12 @@ use std::collections::HashMap;
  * Signature: (Ljava/lang/String;)V
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServer(env: JNIEnv, _class: JClass, config_file_path_jstring: JString, database_file_path_jstring: JString) {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServer(env: JNIEnv, _class: JClass, config_file_path_jstring: JString, database_file_path_jstring: JString, static_files_path_jstring: JString) {
     log_info(&env, "Loading library librconsole");
 
     let config_file_path: String = env.get_string(config_file_path_jstring).expect("Unable to get String from JString 'config_folder_jstring'").into();
     let database_file_path: String = env.get_string(database_file_path_jstring).expect("Unable to get String from JString 'database_file_path_jstring'").into();
+    let static_files_path: String = env.get_string(static_files_path_jstring).expect("Unable to get String from JString 'static_files_path_jstring'").into();
 
     //Load the configuration file
     let config_wrapped = Config::load(PathBuf::from(config_file_path));
@@ -77,7 +78,7 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
 
     //Start the HTTP server
     std::thread::spawn(move || {
-        let _ = crate::webserver::start(config, tx, database_file_path);
+        let _ = crate::webserver::start(config, tx, database_file_path, static_files_path);
     });
 
     //Start listening for logging 'packets' on the created Receiver Channel

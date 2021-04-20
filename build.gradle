@@ -37,7 +37,7 @@ dependencies {
 }
 
 task testJar(type: ShadowJar) {
-	dependsOn('copyNativeBinaries')
+	dependsOn('copyExternalDependencies')
 
 	description 'Build a test Jar'
 	archiveClassifier = 'DEV'
@@ -46,7 +46,7 @@ task testJar(type: ShadowJar) {
 }
 
 task releaseJar(type: ShadowJar) {
-	dependsOn('copyNativeBinaries')
+	dependsOn('copyExternalDependencies')
 
 	description 'Build a release Jar'
 	archiveClassifier = 'RELEASE'
@@ -56,7 +56,7 @@ task releaseJar(type: ShadowJar) {
 
 //This task is for GitHub Actions only
 task ghActions(type: ShadowJar) {	
-	dependsOn('copyNativeBinaries')
+	dependsOn('copyExternalDependencies')
 
 	description 'GitHub Actions Task. Do not use in regular development!'
 	version = ''
@@ -67,17 +67,23 @@ task ghActions(type: ShadowJar) {
 	destinationDirectory = file("$rootDir/actions")
 }
 
-task copyNativeBinaries() {
-	dependsOn('copyLinux')
-	dependsOn('copyWindows')
+task copyExternalDependencies() {
+	dependsOn('copyWindowsLibrary')
+	dependsOn('copyLinuxLibrary')
+	dependsOn('copyWebFiles')
 }
 
-task copyLinux(type: Copy) {
+task copyWebFiles(type: Copy) {
+	from "$rootDir/web/dist.zip"
+	into "$buildDir/resources/main/"	
+}
+
+task copyLinuxLibrary(type: Copy) {
 	from "$rootDir/librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so"
 	into "$buildDir/resources/main/x86_64/linux/"
 }
 
-task copyWindows(type: Copy) {
+task copyWindowsLibrary(type: Copy) {
 	from "$rootDir/librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll"
 	into "$buildDir/resources/main/x86_64/windows/"
 }
