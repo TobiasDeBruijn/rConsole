@@ -2,6 +2,9 @@
 all: releasejar
 
 RUST_SOURCE_FILES := $(shell find librconsole/src -type f)
+TS_SOURCE_FILES := $(shell find web/src/ts -type f)
+SCSS_SOURCE_FILES := $(shell find web/src/scss -type f)
+STATIC_WEB_CONTENT := $(shell find web -type f -name "*.html")
 
 librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so: ${RUST_SOURCE_FILES}
 	cd librconsole; \
@@ -31,13 +34,13 @@ web/node_modules:
 	cd web; \
 		npm i
 
-web/dist/dist.js: web/node_modules
+web/dist/dist.js: web/node_modules ${TS_SOURCE_FILES} ${SCSS_SOURCE_FILES}
 	cd web; \
 		npx webpack
 
-web/dist.zip: web/dist/dist.js
+web/dist.zip: web/dist/dist.js ${STATIC_WEB_CONTENT}
 	cd web; \
-		zip -r dist.zip static/ dist/
+		zip -r dist.zip static/ dist/ index.html
 
 clean:
 	cd librconsole; \

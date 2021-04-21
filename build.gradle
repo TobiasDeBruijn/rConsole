@@ -33,6 +33,8 @@ dependencies {
 	
 	compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
     compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
+    
+    compile 'net.lingala.zip4j:zip4j:2.7.0'
 }
 
 shadowJar {
@@ -45,6 +47,8 @@ task testJar(type: ShadowJar) {
 	description 'Build a test Jar'
 	archiveClassifier = 'DEV'
 	from sourceSets.main.output
+	relocate 'net.lingala.zip4j', 'nl.thedutchmc.rconsole.libs.net.lingala.zip4j'
+	configurations = [project.configurations.runtime]	
 	destinationDirectory = file("$rootDir/server/plugins")
 }
 
@@ -54,6 +58,8 @@ task releaseJar(type: ShadowJar) {
 	description 'Build a release Jar'
 	archiveClassifier = 'RELEASE'
 	from sourceSets.main.output
+	relocate 'net.lingala.zip4j', 'nl.thedutchmc.rconsole.libs.net.lingala.zip4j'	
+	configurations = [project.configurations.runtime]
 	destinationDirectory = file("$rootDir/releases")
 }
 
@@ -65,8 +71,9 @@ task ghActions(type: ShadowJar) {
 	version = ''
 	archiveClassifier = ''
 	archiveBaseName = 'output'
-	
 	from sourceSets.main.output
+	relocate 'net.lingala.zip4j', 'nl.thedutchmc.rconsole.libs.net.lingala.zip4j'	
+	configurations = [project.configurations.runtime]	
 	destinationDirectory = file("$rootDir/actions")
 }
 

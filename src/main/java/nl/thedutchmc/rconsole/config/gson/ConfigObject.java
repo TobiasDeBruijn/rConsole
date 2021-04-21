@@ -5,6 +5,11 @@ public class ConfigObject {
 	private int listenPort;
 	private TokenObject[] tokens;
 	
+	private int librconsolePort;
+	private String pepper;
+	
+	private String baseUrl;
+	
 	public boolean isDebugMode() {
 		return debugMode;
 	}
@@ -19,6 +24,18 @@ public class ConfigObject {
 
 	public boolean isUseWebServer() {
 		return useWebServer;
+	}
+
+	public int getLibrconsolePort() {
+		return librconsolePort;
+	}
+
+	public String getPepper() {
+		return pepper;
+	}
+
+	public String getBaseUrl() {
+		return baseUrl;
 	}
 	
 }

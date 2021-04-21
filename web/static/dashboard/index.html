@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <meta name="theme-color" content="#1D66B5">
+        <meta name="author" content="Tobias de Bruijn &ltgithub@thedutchmc.nl&gt">
+        <meta name="description" content="rConsole Web Interface for Minecraft Spigot servers.">
+        <meta name="keywords" content="rConsole, interface, managment, spigot, minecraft">
+
+        <title>rConsole Dashboard</title>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+        <script src="/dist/dist.js"></script>
+    </head>
+    <body>
+        <noscript>
+            <p> You need JavaScript enabled to use this page. </p>
+        </noscript>
+
+        <nav style="visibility: hidden;">
+            <div class="nav-root">
+                <div class="nav-holder">
+                    <div class="left-aligned">
+                        <img src="../img/logo.png" alt="logo">
+                        <p>rConsole</p>
+                    </div>
+                    <div class="right-aligned">
+                        <p id="githubBtn">GitHub</p>
+                        <p id="logoutBtn">Logout</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main style="visibility: hidden;">
+            <div class="page-root">
+                <div class="console-holder">
+                    <div id="console-view" class="console-view">
+                    </div>
+                    <input type="text" id="console-input" aria-label="Console Command Input">
+                </div>
+            </div>
+        </main>
+        <script>
+            rConsole.setup();
+            rConsole.setupDashboard();
+            rConsole.setupConsoleLoop();
+        </script>
+    </body>
+</html>

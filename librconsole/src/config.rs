@@ -7,13 +7,6 @@ use std::io::Write;
 pub struct Config {
     pub port:   u32,
     pub pepper: String,
-    pub keys:   Vec<KeyItem>
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct KeyItem {
-    pub key:    String,
-    pub name:   String
 }
 
 impl Config {
@@ -35,7 +28,6 @@ impl Config {
             let default_config = Config {
                 port: 8090,
                 pepper: rand::thread_rng().sample_iter(&rand::distributions::Alphanumeric).take(16).map(char::from).collect(),
-                keys: vec![KeyItem { key: format!("example_key_{}", rand::thread_rng().sample_iter(&rand::distributions::Alphanumeric).take(8).map(char::from).collect::<String>()), name: "example_name".to_string() }]
             };
 
             let file = std::fs::File::create(file_path);

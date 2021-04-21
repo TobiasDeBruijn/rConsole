@@ -1,8 +1,9 @@
 import "../scss/index.scss";
+import { loadConfig } from "./config";
 
-import { loadConfig, CONSOLE_NEW_ENDPOINT } from "./config";
-
-export { setupLoginPage } from "./login";
+export { setupLoginPage     } from "./login";
+export { setupDashboard     } from "./dashboard/dashboard";
+export { setupConsoleLoop   } from "./dashboard/console";
 
 export async function showDefaultHidden() {
     let allDefaultHidden = document.querySelectorAll("[data-default-hidden]");

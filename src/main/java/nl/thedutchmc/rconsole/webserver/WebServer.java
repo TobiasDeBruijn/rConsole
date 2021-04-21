@@ -1,13 +1,25 @@
 package nl.thedutchmc.rconsole.webserver;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.introspector.PropertyUtils;
+import org.yaml.snakeyaml.representer.Representer;
+
+import com.google.gson.Gson;
+
+import net.lingala.zip4j.ZipFile;
 import nl.thedutchmc.rconsole.RConsole;
 import nl.thedutchmc.rconsole.annotations.Nullable;
 import nl.thedutchmc.rconsole.util.Util;
@@ -76,25 +88,121 @@ public class WebServer {
 	
 	public void startWebServer(String configFolder) {
 		if(!LIB_LOADED) {
-			RConsole.logWarn("Unable to start Dashboard server because the native library 'librconsole' is not loaded");
+			RConsole.logWarn("Unable to start native webserver because the native library 'librconsole' is not loaded");
 			return;
 		}
 		
+		//Create the configuration folder for librconsole if it doesn't exist.
 		File librconsoleConfigFolder = new File(configFolder + File.separator + "librconsole");
 		if(!librconsoleConfigFolder.exists()) {
 			librconsoleConfigFolder.mkdirs();
 		}
 		
-		File librconsoleConfigFile = new File(librconsoleConfigFolder, "config.yml");
-		File librconsoleDatabaseFile = new File(librconsoleConfigFolder, "librconsole.db3");
-		
-		File staticFilesFolder = new File(librconsoleConfigFolder + File.separator + "static");
-		if(!staticFilesFolder.exists()) {
-			staticFilesFolder.mkdirs();
+		//Class describing the configuration for librconsole
+		//It's values come from the plugin's main configuration
+		final class LibrconsoleConfig {
+			//The variables in here aren't actually unused, they're serialized by Yaml
 			
+			@SuppressWarnings("unused")
+			public int port = WebServer.this.plugin.config.getConfig().getLibrconsolePort();
+			
+			@SuppressWarnings("unused")
+			public String pepper = WebServer.this.plugin.config.getConfig().getPepper();
 		}
 		
+		//Serialize the LibrconsoleConfig object to a Yaml String
+		PropertyUtils propUtils = new PropertyUtils();
+		propUtils.setAllowReadOnlyProperties(true);
+		Representer repr = new Representer();
+		repr.setPropertyUtils(propUtils);
+		
+		final Yaml yaml = new Yaml(new Constructor(), repr);
+		String librConsoleConfigSerialized = yaml.dump(new LibrconsoleConfig());
+		
+		//Write the String to $server/plugins/rConsole/librconsole/config.yml
+		File librconsoleConfigFile = new File(librconsoleConfigFolder, "config.yml");
+		try {
+			librconsoleConfigFile.delete();
+			BufferedWriter bw = new BufferedWriter(new FileWriter(librconsoleConfigFile));
+			bw.write(librConsoleConfigSerialized);
+			bw.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
+		//Get the 'static' folder, in which the website lives.
+		//$server/plugins/rConsole/librconsole/static/
+		File staticFilesFolder = new File(librconsoleConfigFolder + File.separator + "static");
+		
+		//Delete and recreate the static folder.
+		//We want to do this because the files are likely to change if the 
+		//plugin is updated. This way we make sure the files are
+		//always up-to-date.
+		try {
+			Files.walk(staticFilesFolder.toPath())
+				.sorted(Comparator.reverseOrder())
+				.map(Path::toFile)
+				.forEach(File::delete);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		//Recreate the folder
+		staticFilesFolder.mkdirs();
+				
+		//Serialize the website config to a JSON String
+		//The WebConfig class is defined below this method.
+		final Gson gson = new Gson();
+		String webConfigSerialized = gson.toJson(new WebConfig());
+		
+		//Write the JSON String to $server/plugins/rConsole/librconsole/static/rconsole_web_config.json
+		try {
+			File webConfigFile = new File(staticFilesFolder, "rconsole_web_config.json");
+			webConfigFile.delete();
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(webConfigFile));
+			bw.write(webConfigSerialized);
+			bw.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+		//We always want to re-extract the zip file, because if there is an update to the plugin
+		//the static web files also need to be updated. By deleting it every time,
+		//we can guarantee that the files are always up to date.
+		this.plugin.saveResource("dist.zip", true);
+		try {
+			File finalDistZipFile = new File(staticFilesFolder, "dist.zip");
+			Files.move(new File(this.plugin.getDataFolder(), "dist.zip").toPath(), finalDistZipFile.toPath());
+			new ZipFile(finalDistZipFile).extractAll(staticFilesFolder.getAbsolutePath());
+			
+			finalDistZipFile.delete();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//Database file
+		//$server/plugins/rConsole/librconsole/librconsole.db3
+		File librconsoleDatabaseFile = new File(librconsoleConfigFolder, "librconsole.db3");
+		
+		//Finally, start the webserver in librconsole
+		//This is a blocking method call.
 		Native.startWebServer(librconsoleConfigFile.getAbsolutePath(), librconsoleDatabaseFile.getAbsolutePath(), staticFilesFolder.getAbsolutePath());
+	}
+	
+	//Class describing the configuration for the website
+	//It's values come from the plugin's main configuration
+	//
+	//This is not a local class to startWebServer() because of limitations in Gson
+	//See: https://github.com/google/gson/issues/1595
+	final class WebConfig {
+		//The variable isn't actually unused, it's serialized by Gson
+		
+		//Private constructor so the class cannot be instatiated in a different class than WebServer
+		private WebConfig() {}
+		
+		@SuppressWarnings("unused")
+		private String uri = WebServer.this.plugin.config.getConfig().getBaseUrl();
 	}
 	
 	public void log(String log, long timestamp, String level, String thread) {

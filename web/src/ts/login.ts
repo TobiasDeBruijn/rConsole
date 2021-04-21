@@ -40,6 +40,8 @@ function submitLoginForm() {
         statusField.style.visibility = "visible";
 
         return;
+    } else {
+        usernameField.classList.value = "";
     }
 
     if(loginForm.password.value == "") {
@@ -50,10 +52,9 @@ function submitLoginForm() {
         statusField.style.visibility = "visible";
 
         return;
+    } else {
+        passwordField.classList.value = "";
     }
-
-    usernameField.classList.value = "";
-    passwordField.classList.value = "";
 
     statusField.style.visibility = "hidden";
     statusField.innerHTML = "";

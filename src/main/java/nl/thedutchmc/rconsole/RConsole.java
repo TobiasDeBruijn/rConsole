@@ -30,15 +30,16 @@ public class RConsole extends JavaPlugin {
 	public ReadConsole readConsoleFeature;
 	public CommandLoader commandLoader;
 	public WebServer nativeWebServer;
-
+	public Configuration config;
+	
 	private TcpServer tcpServer;
 	
 	@Override
 	public void onEnable() {
 		RConsole.INSTANCE = this;
 		
-		Configuration config = new Configuration(this);
-		RConsole.DEBUG = config.getConfig().isDebugMode();
+		this.config = new Configuration(this);
+		RConsole.DEBUG = this.config.getConfig().isDebugMode();
 		
 		commandLoader = new CommandLoader(this);
 		new AddUserExecutor(this);

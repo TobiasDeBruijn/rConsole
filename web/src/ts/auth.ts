@@ -21,3 +21,7 @@ export async function isLoggedIn(): Promise<boolean> {
 
     return response.status == 200;
 }
+
+export async function doLogout() {
+    
+}

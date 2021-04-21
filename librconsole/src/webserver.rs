@@ -28,7 +28,7 @@ pub async fn start(config: Config, tx: Sender<ConsoleLogItem>, db_path: String, 
             .service(crate::endpoints::console::all_logs::post_logs_all)
             .service(crate::endpoints::console::logs_since::post_logs_since)
             .service(crate::endpoints::auth::login::post_login)
-            .service(Files::new(&static_files_path, ".")
+            .service(Files::new("/", &static_files_path)
                 .prefer_utf8(true)
                 .index_file("index.html")
                 .show_files_listing()

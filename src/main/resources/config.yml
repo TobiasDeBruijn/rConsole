@@ -1,9 +1,23 @@
+# rConsole general configuration
 debugMode: true
+
+# The port on which the TCP server will listen
 listenPort: 8080
-useWebServer: false
+
+# Should we also load the web server
+useWebServer: true
+
+# Authentication tokens for the TCP server
 tokens:
 - name: TEST
   token: ABC
   scopes:
   - READ_CONSOLE
   - SEND_COMMAND
+
+# Configuration for librconsole
+librconsolePort: 8090
+pepper: mrsXlQy9friisbeW
+
+# Website configuration
+baseUrl: http://localhost:8090
