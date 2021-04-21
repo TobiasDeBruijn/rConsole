@@ -41,6 +41,7 @@ public class RConsole extends JavaPlugin {
 		this.config = new Configuration(this);
 		RConsole.DEBUG = this.config.getConfig().isDebugMode();
 		
+		//Register all commands
 		commandLoader = new CommandLoader(this);
 		new AddUserExecutor(this);
 		new DelUserExecutor(this);
@@ -48,24 +49,25 @@ public class RConsole extends JavaPlugin {
 		new ListSessionsExecutor(this);
 		new DelSessionExecutor(this);
 		
+		//Create and start the TCP Socket server
 		this.tcpServer = new TcpServer(config.getConfig().getListenPort(), config.getConfig().getTokens(), this);
 		new Thread(tcpServer, "rConsole-TCPServer-Thread").start();
 				
+		//If the web server is enabled, start it
 		if(config.getConfig().isUseWebServer()) {
-			RConsole.logInfo("Config option 'useWebServer' is set to true. Loading library and starting webserver.");
 			this.nativeWebServer = new WebServer(this);
-			
 			new Thread(new Runnable() {
 				
 				@Override
 				public void run() {
-					RConsole.this.nativeWebServer.startWebServer(RConsole.this.getDataFolder().getAbsolutePath());
+					RConsole.this.nativeWebServer.startWebServer();
 				}
 			}, "rConsole-librconsole-Thread").start();
 		} else {
 			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}
 		
+		//Start the console appender
 		this.readConsoleFeature = new ReadConsole(this.nativeWebServer);
 	}
 	

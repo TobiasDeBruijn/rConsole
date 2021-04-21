@@ -4,11 +4,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.bukkit.Bukkit;
 
 public class ReflectionUtil {
-public static String SERVER_VERSION;
+	public static String SERVER_VERSION;
 	
 	static {
 		//Load the Bukit class
@@ -279,26 +280,97 @@ public static String SERVER_VERSION;
     }
     
     /**
-     * <strong> For debugging purposes! </strong><br>
-     * Print all Methods in a Class with their parameters, will print to stdout
+     * Print all Methods in a Class with their parameters. Will print the Method's modifiers, return type, name and arguments and their types
      * @param clazz The Class to look in
      */
-    public static void printMethodsInClassTyped(Class<?> clazz) {
+    public static void printMethodsInClass(Class<?> clazz) {
     	System.out.println("Methods in " + clazz.getName() + ":");
     	
     	for(Method m : clazz.getDeclaredMethods()) {
-			String print = m.getName() + "(";
+			String print = getModifiers(m.getModifiers()) + " " + m.getReturnType().getName() + " " + m.getName() + "(";
     		for(int i = 0; i < m.getParameterTypes().length; i++) {
     			print += m.getParameterTypes()[i].getName();
     			
     			if(i != m.getParameterTypes().length -1) {
-    				print += ",";
+    				print += ", ";
     			}
-
     		}
     		
     		print += ")";
-    		System.out.println(print);
+    		System.out.println(print.strip());
     	}
-    } 
+    }
+    
+    /**
+     * Print all Fields in a Class. Will print the Field's modifiers, type and name
+     * @param clazz
+     */
+    public static void printFieldsInClass(Class<?> clazz) {
+    	System.out.println("Fields in " + clazz.getName() + ":");
+    	for(Field f : clazz.getDeclaredFields()) {
+			String print = getModifiers(f.getModifiers()) + " " + f.getType().getName() + " " + f.getName();
+			System.out.println(print.strip());
+    	}
+    }
+    
+    /**
+     * Get modifiers as a String
+     * @param modifiers int value of the modifiers
+     * @return Returns the modifiers as a String
+     * @see Field#getModifiers()
+     * @see Class#getModifiers()
+     * @see Method#getModifiers()
+     */
+    private static String getModifiers(int modifiers) {
+		String modifiersStr = "";		
+		if(Modifier.isPrivate(modifiers)) {
+			modifiersStr += " private";
+		}
+		
+		if(Modifier.isProtected(modifiers)) {
+			modifiersStr += " protected";
+		}
+		
+		if(Modifier.isPublic(modifiers)) {
+			modifiersStr += " public";
+		}
+		
+		if(Modifier.isAbstract(modifiers)) {
+			modifiersStr += " abstract";
+		}
+		
+		if(Modifier.isStatic(modifiers)) {
+			modifiersStr += " static";
+		}
+		
+		if(Modifier.isFinal(modifiers)) {
+			modifiersStr += " static";
+		}
+		
+		if(Modifier.isTransient(modifiers)) {
+			modifiersStr += " transient";
+		}
+		
+		if(Modifier.isVolatile(modifiers)) {
+			modifiersStr += " volatile";
+		}
+		
+		if(Modifier.isNative(modifiers)) {
+			modifiersStr += " native";
+		}
+		
+		if(Modifier.isStrict(modifiers)) {
+			modifiersStr += " strictfp";
+		}
+		
+		if(Modifier.isSynchronized(modifiers)) {
+			modifiersStr += " synchronized";
+		}
+		
+		if(Modifier.isInterface(modifiers)) {
+			modifiersStr += " interface";
+		}
+		
+		return modifiersStr.strip();
+    }
 }

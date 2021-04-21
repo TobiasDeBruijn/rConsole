@@ -24,6 +24,11 @@ import nl.thedutchmc.rconsole.RConsole;
 import nl.thedutchmc.rconsole.annotations.Nullable;
 import nl.thedutchmc.rconsole.util.Util;
 
+/**
+ * Wrapper class around {@link Native}
+ * @author Tobias de Bruijn
+ *
+ */
 public class WebServer {
 
 	private static boolean LIB_LOADED = false;
@@ -38,6 +43,7 @@ public class WebServer {
 			String osString = System.getProperty("os.name").toLowerCase();
 			String nativeLibraryName;
 			
+			//Determine the OS, and from that get the path inside the jar file to librconsole
 			if(osString.contains("linux") ) {
 				nativeLibraryName = "/x86_64/linux/librconsole.so";
 			} else if(osString.contains("windows")) {
@@ -48,6 +54,8 @@ public class WebServer {
 			}
 		
 			URL libUrl = WebServer.class.getResource(nativeLibraryName);
+		
+			//Create a temporary directory in which we save librconsole
 			File tmpDir;
 			try {
 				tmpDir = Files.createTempDirectory("librconsole").toFile();
@@ -58,10 +66,12 @@ public class WebServer {
 				break saveNativeLib;
 			}
 			
+			//Get only 'librconsole' and the file extension, since that is the name we want the file to have on disk
 			String[] nativeLibNameParts = nativeLibraryName.split(Pattern.quote("/"));
 			File libTmpFile = new File(tmpDir, nativeLibNameParts[nativeLibNameParts.length-1]);
 			libTmpFile.deleteOnExit();
 			
+			//Copy the file from the jar to the temporary file on disk
 			try {
 				InputStream in = libUrl.openStream();
 				Files.copy(in, libTmpFile.toPath());
@@ -72,6 +82,7 @@ public class WebServer {
 				break saveNativeLib;
 			}
 			
+			//Finally, try to load the library
 			try {
 				System.load(libTmpFile.getAbsolutePath());
 			} catch(UnsatisfiedLinkError e) {
@@ -81,19 +92,22 @@ public class WebServer {
 				break saveNativeLib;
 			}
 
-			
 			LIB_LOADED = true;
 		}
 	}
 	
-	public void startWebServer(String configFolder) {
+	/**
+	 * Start the web server<br>
+	 * This is a blocking method.
+	 */
+	public void startWebServer() {
 		if(!LIB_LOADED) {
 			RConsole.logWarn("Unable to start native webserver because the native library 'librconsole' is not loaded");
 			return;
 		}
 		
 		//Create the configuration folder for librconsole if it doesn't exist.
-		File librconsoleConfigFolder = new File(configFolder + File.separator + "librconsole");
+		File librconsoleConfigFolder = new File(this.plugin.getDataFolder() + File.separator + "librconsole");
 		if(!librconsoleConfigFolder.exists()) {
 			librconsoleConfigFolder.mkdirs();
 		}
@@ -190,11 +204,13 @@ public class WebServer {
 		Native.startWebServer(librconsoleConfigFile.getAbsolutePath(), librconsoleDatabaseFile.getAbsolutePath(), staticFilesFolder.getAbsolutePath());
 	}
 	
-	//Class describing the configuration for the website
-	//It's values come from the plugin's main configuration
-	//
-	//This is not a local class to startWebServer() because of limitations in Gson
-	//See: https://github.com/google/gson/issues/1595
+	/**Class describing the configuration for the website<br>
+	 * It's values come from the plugin's main configuration<br>
+	 * <br>
+	 * This is not a local class to {@link WebServer#startWebServer()} because of limitations in Gson
+	 * 
+	 * @see <a href="https://github.com/google/gson/issues/1595"> Gson issue 1595 on GitHub</a>
+	 */
 	final class WebConfig {
 		//The variable isn't actually unused, it's serialized by Gson
 		
@@ -205,14 +221,36 @@ public class WebServer {
 		private String uri = WebServer.this.plugin.config.getConfig().getBaseUrl();
 	}
 	
+	/**
+	 * Append a log entry<br>
+	 * This will spawn a new Thread
+	 * @param log The message of the log entry
+	 * @param timestamp The timestamp of when the log occurred
+	 * @param level The level at which the log occurred, INFO or WARN
+	 * @param thread The thread from which the log originated
+	 */
 	public void log(String log, long timestamp, String level, String thread) {
 		if(!LIB_LOADED) {
 			return;
 		}
 		
-		Native.appendConsoleLog(log, timestamp, level, thread);
+		//We put this on a new thread, since it is possible that the lock of the Database object on the rust side isn't free,
+		//Then this call will block, and because logging happens quite frequently, and we don't want to hold it up,
+		//we put it on a different thread.
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Native.appendConsoleLog(log, timestamp, level, thread);
+			}
+		}).start();
 	}
 	
+	/**
+	 * Add a user
+	 * @param username The username of the user
+	 * @param password The password of the user
+	 */
+	//TODO this should return a Boolean indicating if the creation was successful
 	public void addUser(String username, String password) {
 		if(!LIB_LOADED) {
 			return;
@@ -221,6 +259,11 @@ public class WebServer {
 		Native.addUser(username, password);
 	}
 	
+	/**
+	 * Delete a user
+	 * @param username The username of the user to delete
+	 * @return returns true if the deletion was successful, false if the user did not exist or null if an error occurred
+	 */
 	@Nullable
 	public Boolean delUser(String username) {
 		if(!LIB_LOADED) {
@@ -230,6 +273,10 @@ public class WebServer {
 		return Native.delUser(username);
 	}
 	
+	/**
+	 * Get a list of existing usernames
+	 * @return Returns the usernames as a String[], or null if an error occurred
+	 */
 	@Nullable
 	public String[] listUsers() {
 		if(!LIB_LOADED) {
@@ -239,6 +286,10 @@ public class WebServer {
 		return Native.listUsers();
 	}
 	
+	/**
+	 * Get a HashMap with the username and sessions associated with that username
+	 * @return Returns the HashMap, or null if an error occurred
+	 */
 	@Nullable
 	public HashMap<String, String[]> getUserSessions() {
 		if(!LIB_LOADED) {
@@ -248,6 +299,11 @@ public class WebServer {
 		return Native.getUserSessions();
 	}
 	
+	/**
+	 * Delete a session
+	 * @param sessionId The ID of the session to delete
+	 * @return returns true if the session was deleted successfully, false if the session did not exist or null if an error occurred
+	 */
 	@Nullable
 	public Boolean delSession(String sessionId) {
 		if(!LIB_LOADED) {

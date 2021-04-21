@@ -35,11 +35,15 @@ public class DelUserExecutor implements PluginCommand {
 			return true;
 		}
 		
+		Boolean successful = this.plugin.nativeWebServer.delUser(args[0]);
+		if(successful == null) {
+			sender.sendMessage(ChatColor.GOLD + String.format("An error occurred while deleting user %s%s%.", ChatColor.RED, args[0], ChatColor.GOLD));
+		}
 		
-		if(this.plugin.nativeWebServer.delUser(args[0])) {
+		if(successful) {
 			sender.sendMessage(ChatColor.GOLD + String.format("User %s%s%s was deleted successfully.", ChatColor.RED, args[0], ChatColor.GOLD));
 		} else {
-			sender.sendMessage(ChatColor.GOLD + String.format("Deleting user %s%s%s unsuccessful. See console for more details.", ChatColor.RED, args[0], ChatColor.GOLD));
+			sender.sendMessage(ChatColor.GOLD + String.format("The user %s%s%s does not exist.", ChatColor.RED, args[0], ChatColor.GOLD));
 		}
 		
 		return true;
