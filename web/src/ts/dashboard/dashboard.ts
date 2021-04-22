@@ -1,6 +1,9 @@
 import { isLoggedIn, doLogout } from "../auth";
+import { setup                } from "../index";
 
 export async function setupDashboard() {
+    await setup();
+
     //Check authentication
     if(!await isLoggedIn()) {
         window.location.href = "../login.html";

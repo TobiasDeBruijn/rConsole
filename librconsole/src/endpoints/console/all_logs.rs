@@ -20,9 +20,9 @@ pub struct LogResponse {
 #[post("/console/all")]
 pub async fn post_logs_all(data: web::Data<crate::webserver::AppData>, form: web::Form<LogRequest>) -> HttpResponse {
     let db = Database::new(PathBuf::from(data.db_path.clone())).unwrap();
-    let sql_check_session =  db.connection.execute("SELECT 1 FROM sessions WHERE session_id = :session_id", named_params! {
+    let sql_check_session: rusqlite::Result<bool> =  db.connection.query_row("SELECT EXISTS(SELECT 1 FROM sessions WHERE session_id = :session_id)", named_params! {
         ":session_id": &form.session_id
-    });
+    }, |row| row.get(0));
 
     if sql_check_session.is_err() {
         let tx = data.log_tx.lock().unwrap();
@@ -31,7 +31,7 @@ pub async fn post_logs_all(data: web::Data<crate::webserver::AppData>, form: web
         return HttpResponse::InternalServerError().finish();
     }
 
-    if sql_check_session.unwrap() != 1 {
+    if !sql_check_session.unwrap() {
         return HttpResponse::Ok().json(LogResponse { status: 401, logs: None});
     }
 

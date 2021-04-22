@@ -27,12 +27,12 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: [ '.ts' ]
+        extensions: [ '.ts', '.js', '.css', '.sass', '.scss' ],
     },
     externals: {
         // require("jquery") is external and available
         //  on the global var jQuery
-        "jquery": "jQuery"
+        "jquery": "jQuery",
     },
     mode: 'production',
     watchOptions: {

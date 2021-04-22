@@ -10,3 +10,6 @@ server/
 bin/
 .classpath
 .project
+
+#Temp
+*.h

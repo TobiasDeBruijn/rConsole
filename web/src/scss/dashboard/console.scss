@@ -1,0 +1,54 @@
+@use '../incl/color' as *;
+@use '../incl/font' as *;
+
+.console-holder {
+    background-color: black;
+    width: 50vw;
+
+    .console-view {
+        height: 50vh;
+        padding-bottom: 2px;
+        overflow-y: scroll;
+        background-color: inherit;
+
+        //All children of .console-view and all their children recursively
+        *, * > * {
+            background-color: inherit;
+            color: white;
+            @include set-font($noto-sans, 400, true);
+            font-size: 0.8em;
+        }
+    }
+
+    .input-view {
+        height: 1em;
+        background-color: inherit;
+
+        display: flex;
+        flex-direction: row;
+
+        div {
+            padding: 0;
+            margin: 0;
+            color: white;
+            @include set-font($noto-sans, 400);
+            font-size: 0.8em;
+        }
+
+        input {
+            margin: 0;
+            padding: 0;
+            border: none;
+            background-color: inherit;
+            color: white;
+
+            @include set-font($noto-sans, 400, true);
+            font-size: 0.8em;
+            width: 100vw
+        }
+
+        input:focus {
+            outline: none !important;
+        }
+    }
+}

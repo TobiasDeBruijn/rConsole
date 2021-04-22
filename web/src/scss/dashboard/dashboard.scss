@@ -1,0 +1,9 @@
+@forward './console.scss';
+@forward './nav.scss';
+
+@use '../incl/color' as *;
+@use '../incl/font' as *;
+
+.page-root {
+    visibility: visible;
+}

@@ -18,8 +18,13 @@ export interface ICombinedLogEntry {
 }
 
 export interface ILogEntry {
-    message:    string;
-    timestamp:  number;
-    level:      string;
-    thread:     string;
+    message:        string;
+    timestamp:      number;
+    level:          string;
+    thread:         string;
+    log_attributes: LogAttribute[];
+}
+
+export enum LogAttribute {
+    LogNoIndex
 }

@@ -2,3 +2,6 @@ node_modules/
 dist/
 *.zip
 package-lock.json
+
+#Used in dev only
+rconsole_web_config.json

@@ -77,9 +77,15 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
         database_pinned.set(Some(database));
     }
 
+    let (command_tx, command_rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+    {
+        let rx_lock = crate::RX_COMMANDS.lock().unwrap();
+        rx_lock.set(Some(command_rx));
+    }
+
     //Start the HTTP server
     std::thread::spawn(move || {
-        let _ = crate::webserver::start(config, tx, database_file_path, static_files_path);
+        let _ = crate::webserver::start(config, tx, command_tx, database_file_path, static_files_path);
     });
 
     //Start listening for logging 'packets' on the created Receiver Channel
@@ -102,7 +108,8 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_appendConsol
         message: log_message,
         timestamp: log_timestamp,
         level: log_level,
-        thread: log_thread
+        thread: log_thread,
+        log_attributes: Vec::new()
     };
 
     let buffer_pinned = crate::LOG_BUFFER.pin();
@@ -410,4 +417,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delSession(e
     *convert_jvalue_to_jobject(
         bool_to_Boolean(&env, true).expect("An error occurred while converting a bool to a java/lang/Boolean")
     ).expect("An error occurred while converting a jvalue to a jobject")
+}
+
+#[no_mangle]
+pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startCommandListenThread(env: JNIEnv, _class: JClass) {
+    let rx_lock = crate::RX_COMMANDS.lock().unwrap();
+    let rx=  rx_lock.take().unwrap();
+
+    crate::jni::command_rx(env, rx);
 }

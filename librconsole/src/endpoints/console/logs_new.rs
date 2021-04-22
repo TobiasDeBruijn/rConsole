@@ -18,12 +18,12 @@ pub struct LogResponse {
     logs:       Option<Vec<CombinedLogEntry>>
 }
 
-#[post("/console/since")]
-pub async fn post_logs_since(data: web::Data<crate::webserver::AppData>, form: web::Form<LogRequest>) -> HttpResponse {
+#[post("/console/new")]
+pub async fn post_logs_new(data: web::Data<crate::webserver::AppData>, form: web::Form<LogRequest>) -> HttpResponse {
     let db = Database::new(PathBuf::from(data.db_path.clone())).unwrap();
-    let sql_check_session =  db.connection.execute("SELECT 1 FROM sessions WHERE session_id = :session_id", named_params! {
+    let sql_check_session: rusqlite::Result<bool> =  db.connection.query_row_and_then("SELECT EXISTS(SELECT 1 FROM sessions WHERE session_id = :session_id)", named_params! {
         ":session_id": &form.session_id
-    });
+    }, |row| row.get(0));
 
     if sql_check_session.is_err() {
         let tx = data.log_tx.lock().unwrap();
@@ -32,7 +32,7 @@ pub async fn post_logs_since(data: web::Data<crate::webserver::AppData>, form: w
         return HttpResponse::InternalServerError().finish();
     }
 
-    if sql_check_session.unwrap() != 1 {
+    if !sql_check_session.unwrap() {
         return HttpResponse::Ok().json(LogResponse { status: 401, logs: None});
     }
 
@@ -48,7 +48,7 @@ pub async fn post_logs_since(data: web::Data<crate::webserver::AppData>, form: w
     }
 
     let mut combined_entries: Vec<CombinedLogEntry> = vec![];
-    for i in since..((pinned.len() as u32) -1) {
+    for i in since..pinned.len() as u32 {
         let v = pinned.get(&i).unwrap();
         combined_entries.push(CombinedLogEntry { id: i, log_entry: v.clone() })
     }

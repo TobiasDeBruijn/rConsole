@@ -42,3 +42,14 @@ Insert a <K, V> into a java.util.HashMap
 pub fn hashmap_put<'a>(env: &'a JNIEnv, hashmap: JObject<'a>, key: JValue, value: JValue) -> Result<JValue<'a>, jni::errors::Error> {
     env.call_method(hashmap, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", &[key, value])
 }
+
+/**
+Convert a &str to a JValue
+*/
+pub fn str_to_jvalue<'a>(env: &'a JNIEnv, str: &str) -> JValue<'a> {
+    let log_jstring = env.new_string(str).unwrap();
+    let log_jobject = JObject::from(log_jstring);
+    let log_jvalue = JValue::from(log_jobject);
+
+    log_jvalue
+}

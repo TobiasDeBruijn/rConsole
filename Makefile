@@ -6,6 +6,9 @@ TS_SOURCE_FILES := $(shell find web/src/ts -type f)
 SCSS_SOURCE_FILES := $(shell find web/src/scss -type f)
 STATIC_WEB_CONTENT := $(shell find web -type f -name "*.html")
 
+#NPROCS = $(shell grep -c 'processor' /proc/cpuinfo)
+#MAKEFLAGS += -j$(NPROCS)
+
 librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so: ${RUST_SOURCE_FILES}
 	cd librconsole; \
 		cargo build --lib --release --target x86_64-unknown-linux-gnu
@@ -34,11 +37,15 @@ web/node_modules:
 	cd web; \
 		npm i
 
-web/dist/dist.js: web/node_modules ${TS_SOURCE_FILES} ${SCSS_SOURCE_FILES}
+web/dist/dist.js: $(wildcard web/node_modules) ${TS_SOURCE_FILES} ${SCSS_SOURCE_FILES}
 	cd web; \
 		npx webpack
 
-web/dist.zip: web/dist/dist.js ${STATIC_WEB_CONTENT}
+web/dist/ansi_up.js: $(wildcard web/node_modules/ansi_up/ansi_up.js)
+	cp web/node_modules/ansi_up/ansi_up.js web/dist/ansi_up.js
+
+web/dist.zip: web/dist/dist.js web/dist/ansi_up.js ${STATIC_WEB_CONTENT}
+	rm -f web/dist.zip
 	cd web; \
 		zip -r dist.zip static/ dist/ index.html
 

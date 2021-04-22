@@ -6,12 +6,11 @@ interface IConfig {
 
 export async function loadConfig() {
     let getConfigRequest = $.ajax({
-        url: "/rconsole_web_config.jsonc",
+        url: "/rconsole_web_config.json",
         method: "GET"
     });
 
-    let configResponse = await getConfigRequest;
-    let config = <IConfig> JSON.parse(configResponse);
+    let config = <IConfig> await getConfigRequest;
 
     LOGIN_ENDPOINT =       config.uri + "/auth/login";
     SESSION_ENDPOINT =     config.uri + "/auth/session";
@@ -24,3 +23,5 @@ export let SESSION_ENDPOINT:        string;
 
 export let CONSOLE_ALL_ENDPOINT:    string;
 export let CONSOLE_NEW_ENDPOINT:    string;
+
+console.log(1);

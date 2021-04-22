@@ -21,9 +21,8 @@ public class CommandLoader {
 	private static CommandMap commandMap;
 	private static SimplePluginManager pluginManager;
 	static {
-		Field commandMapField;
 		try {
-			commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+			Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
 			commandMapField.setAccessible(true);
 			
 			commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());

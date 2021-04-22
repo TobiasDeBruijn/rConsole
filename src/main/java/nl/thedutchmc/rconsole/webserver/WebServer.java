@@ -312,4 +312,16 @@ public class WebServer {
 		
 		return Native.delSession(sessionId);
 	}
+	
+	/**
+	 * Start the command listening Thread<br>
+	 * This is a blocking method
+	 */
+	public void startCommandListenThread() {
+		if(!LIB_LOADED) {
+			return;
+		}	
+		
+		Native.startCommandListenThread();
+	}
 }

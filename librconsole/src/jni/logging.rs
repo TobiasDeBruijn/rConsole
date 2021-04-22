@@ -1,6 +1,6 @@
 use jni::JNIEnv;
-use jni::objects::{JValue, JObject};
 use std::sync::mpsc::{Receiver, Sender};
+use crate::jni::util::str_to_jvalue;
 
 /**
 Struct to describe a logging operation to the console
@@ -42,9 +42,9 @@ Listen for incoming logging packets on `rx`
     rx: The Receiver on which ConsoleLogItems will be coming in
 
 */
-pub fn logging_rec(env: JNIEnv, rx: Receiver<ConsoleLogItem>) {
+pub fn logging_rec(env: JNIEnv, log_rx: Receiver<ConsoleLogItem>) {
     loop {
-        let rec = rx.recv().unwrap();
+        let rec = log_rx.recv().unwrap();
         match rec.level {
             LogLevel::Info => log_info(&env, &rec.log),
             LogLevel::Warn => log_warn(&env, &rec.log),
@@ -85,15 +85,4 @@ pub fn log_debug<'a>(env: &'a JNIEnv, log: &str) {
     */
     let log_str_formatted = format!("[librconsole] {}", log);
     let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logDebug", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
-}
-
-/**
-Convert a &str to a JValue
-*/
-fn str_to_jvalue<'a>(env: &'a JNIEnv, str: &str) -> JValue<'a> {
-    let log_jstring = env.new_string(str).unwrap();
-    let log_jobject = JObject::from(log_jstring);
-    let log_jvalue = JValue::from(log_jobject);
-
-    log_jvalue
 }

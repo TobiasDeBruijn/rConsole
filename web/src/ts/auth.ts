@@ -16,6 +16,10 @@ export async function isLoggedIn(): Promise<boolean> {
         }
     });
 
+    isLoggedInReq.fail((e) => {
+        console.log(e);
+    });
+
     let isLoggedInResponse = await isLoggedInReq;
     let response = <ISessionResponse> JSON.parse(isLoggedInResponse);
 

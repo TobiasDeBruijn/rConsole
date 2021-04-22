@@ -3,13 +3,16 @@ import { LOGIN_ENDPOINT } from './config';
 import { ILoginResponse } from './server_types'; 
 import { setCookie      } from './util';
 import { isLoggedIn     } from './auth';
+import { setup          } from './index';
 
 interface ILoginForm extends HTMLFormElement {
     username: HTMLInputElement;
     password: HTMLInputElement;
 }
 
-export function setupLoginPage() {
+export async function setupLoginPage() {
+    await setup();
+
     document.getElementById("login-form-submit-btn").addEventListener("click", function(e) {
         submitLoginForm();
     });

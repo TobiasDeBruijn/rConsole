@@ -62,7 +62,14 @@ public class RConsole extends JavaPlugin {
 				public void run() {
 					RConsole.this.nativeWebServer.startWebServer();
 				}
-			}, "rConsole-librconsole-Thread").start();
+			}, "rConsole-librconsole-server-Thread").start();
+			
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					RConsole.this.nativeWebServer.startCommandListenThread();
+				}
+			}, "rConsole-librconsole-command-Thread");
 		} else {
 			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}

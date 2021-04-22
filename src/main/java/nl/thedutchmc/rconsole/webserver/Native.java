@@ -65,4 +65,10 @@ public class Native {
 	 */
 	@Nullable
 	protected native static Boolean delSession(String sessionId);
+	
+	/**
+	 * Start the command listening Thread<br>
+	 * This is a blocking method
+	 */
+	protected native static void startCommandListenThread();
 }
