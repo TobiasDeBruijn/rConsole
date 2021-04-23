@@ -1,6 +1,6 @@
 [package]
 name = "librconsole"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Tobias de Bruijn <github@thedutchmc.nl>"]
 edition = "2018"
 
