@@ -2,7 +2,7 @@
 @use '../incl/font' as *;
 
 .console-holder {
-    width: 50vw;
+    width: 100vw;
 
     .console-view {
         height: 50vh;
@@ -12,12 +12,28 @@
         overflow-wrap: break-word;
         background-color: inherit;
 
-        //All children of .console-view and all their children recursively
-        *, * > *, span {
-            background-color: inherit;
-            color: white;
-            @include set-font($noto-sans, 400, true);
-            font-size: 0.8em;
+        div {
+            width: 50vw;
+            overflow: hidden;
+            overflow-wrap: break-word;
+
+            @media screen and(max-width: 600px) {
+                width: 97vw;
+            }
+
+            p {
+                margin: 0;
+                padding: 0;
+
+                color: white;
+                @include set-font($noto-sans, 400, true);
+                font-size: 0.8rem;
+
+                span {
+                    @include set-font($noto-sans, 400, true);
+                    font-size: 0.8rem;
+                }
+            }
         }
     }
 

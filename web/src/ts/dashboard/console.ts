@@ -4,6 +4,7 @@ import { CONSOLE_ALL_ENDPOINT, CONSOLE_COMMAND_ENDPOINT, CONSOLE_NEW_ENDPOINT } 
 import { setup                                      } from '../index';
 import { ILogResponse, LogAttribute                 } from '../server_types';
 import { getCookie                                  } from '../util';
+import { parseJsonSourceFileConfigFileContent } from '../../../node_modules/typescript/lib/typescript';
 
 const ANSI_UP = new AnsiUp();
 
@@ -189,8 +190,12 @@ function parseConsoleResponse(response: ILogResponse, emptyConsole = false): boo
         //TODO Timestamp from Epoch to [HH:mm:ss]
         let date = new Date(e.log_entry.timestamp);
         let timestampFormatted = "[" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
-        logEntry.innerHTML = timestampFormatted + " [" + e.log_entry.thread + "/" + e.log_entry.level + "]: " + ANSI_UP.ansi_to_html(e.log_entry.message);
+
+        let logEntryTextComponent = document.createElement('p');
+        logEntryTextComponent.innerHTML = timestampFormatted + " [" + e.log_entry.thread + "/" + e.log_entry.level + "]: " + ANSI_UP.ansi_to_html(e.log_entry.message);
         
+        logEntry.appendChild(logEntryTextComponent);
+
         CONSOLE_VIEW.appendChild(logEntry);
     });
 

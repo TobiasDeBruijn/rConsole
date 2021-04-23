@@ -11,6 +11,16 @@
 
     @media screen and(max-width: 600px) {
         flex-direction: column;
+        justify-content: flex-start;
+        height: 90vh;
+        margin-bottom: 5vh;
+
+        width: 100vw;
+        padding: 1.5vw;
+
+        .console-root {
+            margin-top: 2em;
+        }
     }
 
     padding: 0;
@@ -29,6 +39,12 @@
     border: 1px solid black;
     border-radius: 5px;
     height: calc(50vh + 1em);
+
+    width: 50vw;
+    @media screen and(max-width: 600px) {
+        width: 97vw;
+        margin-bottom: 3vh;
+    }
 }
 
 .server-control-root {
@@ -38,6 +54,10 @@
     border-radius: 5px;
     height: 20vh;
     width: 25vw;
+
+    @media screen and(max-width: 600px) {
+        width: 97vw;
+    }
 
     padding: 0;
     
@@ -64,9 +84,11 @@
             line-height: 2em;
         }
 
+        //TODO
+        /*
         .server-stats-holder {
-            //TODO
         }
+        */
 
         .server-control-btns {
             display: flex;

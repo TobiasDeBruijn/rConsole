@@ -1,0 +1,48 @@
+@use '../incl/font' as *;
+
+nav {
+    visibility: visible !important;
+    width: 100vw;
+    .nav-root {
+        width: 100vw;
+
+        .nav-holder {
+            width: 100vw;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            background-color: #1E2934;
+            height: 3rem;
+
+            div {
+                display: flex;
+                flex-direction: row;
+                
+                * {
+                    margin: 10px;
+                    color: #CAD1D9;
+                    @include set-font($roboto, 400);
+                }
+
+                p {
+                    line-height: calc(3rem / 2);
+                }
+            }
+
+            .left-aligned {
+                justify-content: flex-start;
+            }
+
+            .right-aligned {
+                justify-content: flex-end;
+
+                p:hover {
+                    cursor: pointer;
+                    color: darken(#CAD1D9, 15%);
+                    transition: 0.5s ease;
+                }
+            }
+        }
+    }
+}
