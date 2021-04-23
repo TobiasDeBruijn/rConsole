@@ -1,26 +1,23 @@
-
 use actix_web::{HttpServer, App};
 use crate::config::Config;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Sender;
-use crate::jni::logging::ConsoleLogItem;
 use actix_files::Files;
 use actix_cors::Cors;
+use crate::jni::JvmCommand;
 
 #[derive(Clone)]
 pub struct AppData {
-    pub log_tx:     Arc<Mutex<Sender<ConsoleLogItem>>>,
-    pub command_tx: Arc<Mutex<Sender<String>>>,
+    pub jvm_command_tx: Arc<Mutex<Sender<JvmCommand>>>,
     pub config:     Config,
     pub db_path:    String
 }
 
 #[actix_web::main]
-pub async fn start(config: Config, log_tx: Sender<ConsoleLogItem>, command_tx: Sender<String>, db_path: String, static_files_path: String) -> std::io::Result<()>{
+pub async fn start(config: Config, db_path: String, static_files_path: String, jvm_command_tx: Sender<JvmCommand>) -> std::io::Result<()>{
     let port = config.port;
     let data = AppData {
-        log_tx: Arc::new(Mutex::new(log_tx)),
-        command_tx: Arc::new(Mutex::new(command_tx)),
+        jvm_command_tx: Arc::new(Mutex::new(jvm_command_tx)),
         config,
         db_path
     };

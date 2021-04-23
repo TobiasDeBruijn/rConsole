@@ -1,4 +1,4 @@
-use crate::jni::logging::{LogLevel, log};
+use crate::jni::logging::{LogLevel, ConsoleLogItem};
 use crate::database::Database;
 use crate::webserver::AppData;
 
@@ -6,6 +6,7 @@ use actix_web::{web, post, HttpResponse};
 use serde::{Serialize, Deserialize};
 use rusqlite::named_params;
 use std::path::PathBuf;
+use crate::jni::{JvmCommand, Method, Argument};
 
 #[derive(Deserialize)]
 pub struct ExecuteCommandRequest {
@@ -25,9 +26,11 @@ pub async fn post_execute_command(data: web::Data<AppData>, form: web::Form<Exec
         ":session_id": &form.session_id
     }, |row| row.get(0));
 
+    let jvm_command_tx = data.jvm_command_tx.lock().unwrap();
+
     if sql_check_session.is_err() {
-        let tx = data.log_tx.lock().unwrap();
-        log(&tx, LogLevel::Warn, &format!("An error occurred while verifying a session_id: {:?}", sql_check_session.err().unwrap()));
+        let jvm_command = JvmCommand::log(ConsoleLogItem::new(LogLevel::Warn,format!("An error occurred while verifying a session_id: {:?}", sql_check_session.err().unwrap()) ));
+        &jvm_command_tx.send(jvm_command);
 
         return HttpResponse::InternalServerError().finish();
     }
@@ -36,8 +39,15 @@ pub async fn post_execute_command(data: web::Data<AppData>, form: web::Form<Exec
         return HttpResponse::Ok().json(ExecuteCommandResponse { status: 401});
     }
 
-    let command_tx = data.command_tx.lock().unwrap();
-    command_tx.send(form.command.clone()).expect("An issue occurred while sending a command");
+    //Get the class 'nl.thedutchmc.rconsole.webserver.WebServer
+    let jvm_command_get_webserver_class = JvmCommand::get_class("nl/thedutchmc/rconsole/webserver/WebServer");
+    jvm_command_tx.send(jvm_command_get_webserver_class.0).expect("An issue occurred while sending a JvmCommand");
+    let jvm_response = jvm_command_get_webserver_class.1.recv().expect("An issue occurred while reading the response of a JvmCommand execution");
+
+    //Execute the method 'nl.thedutchmc.rconsole.webserver.WebServer#execCommand(String)'
+    let exec_command_method = Method::static_method(jvm_response, "execCommand", "(Ljava/lang/String;)V", vec![Argument::String(form.command.clone())]);
+    let jvm_command_exec_command = JvmCommand::exec_method_no_return(exec_command_method);
+    jvm_command_tx.send(jvm_command_exec_command).expect("An issue occurred while sending a JvmCommand");
 
     HttpResponse::Ok().json(ExecuteCommandResponse { status: 200 })
 }

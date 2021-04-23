@@ -316,18 +316,6 @@ public class WebServer {
 	}
 	
 	/**
-	 * Start the command listening Thread<br>
-	 * This is a blocking method
-	 */
-	public void startCommandListenThread() {
-		if(!LIB_LOADED) {
-			return;
-		}	
-		
-		Native.startCommandListenThread();
-	}
-	
-	/**
 	 * Execute a command<br>
 	 * This is a wrapper method around {@link Bukkit#dispatchCommand(org.bukkit.command.CommandSender, String)}, this is because we need to sync with the main server thread.<br>
 	 * This method is for native methods to call.

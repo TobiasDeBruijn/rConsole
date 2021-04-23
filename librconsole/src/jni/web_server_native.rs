@@ -1,4 +1,4 @@
-use crate::jni::logging::{log_warn, log_debug, log_info, ConsoleLogItem, logging_rec};
+use crate::jni::logging::{log_warn, log_debug, log_info};
 use crate::config::Config;
 use crate::LogEntry;
 
@@ -6,12 +6,13 @@ use jni::JNIEnv;
 use jni::objects::{JString, JClass, JValue, JObject};
 use jni::sys::{jlong, jobjectArray, jobject};
 use std::path::PathBuf;
-use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc::{Sender, Receiver, channel};
 use rand::Rng;
 use sha2::{Sha512Trunc256, Digest};
 use rusqlite::{named_params, OptionalExtension, Connection};
 use std::collections::HashMap;
 use crate::jni::util::{bool_to_Boolean, convert_jvalue_to_jobject, create_string_array, create_hashmap, hashmap_put};
+use crate::jni::{jvm_command_exec, JvmCommand};
 
 /**
  * Class:     nl.thedutchmc.rconsole.webserver.Native
@@ -45,16 +46,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
 
     let database = database_wrapped.unwrap();
     log_info(&env, "Database loaded.");
-
     log_info(&env, &format!("Loaded librconsole configuration. Listening on 0.0.0.0:{port} and [::]:{port}", port = config.port));
 
     {
         let config_pinned = crate::CONFIG.lock().unwrap();
         config_pinned.set(Some(config.clone()));
     }
-
-    //Create a Channel for logging purposes
-    let (tx , rx): (Sender<ConsoleLogItem>, Receiver<ConsoleLogItem>) = std::sync::mpsc::channel();
 
     //Create the 'users' table if it doesn't exist in the database
     let sql_create_user_table = database.connection.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, username TEXT NOT NULL, hash TEXT NOT NULL, salt TEXT NOT NULL)", named_params! {});
@@ -77,19 +74,16 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
         database_pinned.set(Some(database));
     }
 
-    let (command_tx, command_rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
-    {
-        let rx_lock = crate::RX_COMMANDS.lock().unwrap();
-        rx_lock.set(Some(command_rx));
-    }
+
+    //Create the channel on which JvmCommand's will be send and received
+    let (jvm_command_tx, jvm_command_rx): (Sender<JvmCommand>, Receiver<JvmCommand>) = channel();
 
     //Start the HTTP server
     std::thread::spawn(move || {
-        let _ = crate::webserver::start(config, tx, command_tx, database_file_path, static_files_path);
+        let _ = crate::webserver::start(config,database_file_path, static_files_path, jvm_command_tx);
     });
 
-    //Start listening for logging 'packets' on the created Receiver Channel
-    logging_rec(env, rx);
+    jvm_command_exec(env, jvm_command_rx);
 }
 
 /**
@@ -417,14 +411,4 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delSession(e
     *convert_jvalue_to_jobject(
         bool_to_Boolean(&env, true).expect("An error occurred while converting a bool to a java/lang/Boolean")
     ).expect("An error occurred while converting a jvalue to a jobject")
-}
-
-#[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startCommandListenThread(env: JNIEnv, _class: JClass) {
-    let rx_lock = crate::RX_COMMANDS.lock().unwrap();
-    let rx=  rx_lock.take().unwrap();
-
-    log_info(&env, "Now listening for console commands.");
-
-    crate::jni::command_rx(env, rx);
 }

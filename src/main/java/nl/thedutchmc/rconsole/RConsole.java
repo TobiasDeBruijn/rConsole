@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.gson.Gson;
@@ -65,16 +66,6 @@ public class RConsole extends JavaPlugin {
 					RConsole.this.nativeWebServer.startWebServer();
 				}
 			}, "rConsole-librconsole-server-Thread").start();
-			
-			Thread commandThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					RConsole.this.nativeWebServer.startCommandListenThread();
-				}
-			}, "rConsole-librconsole-command-Thread");
-			
-	    	final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
-	    	scheduler.schedule(() -> commandThread.start(), 10, TimeUnit.SECONDS);
 		} else {
 			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}

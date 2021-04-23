@@ -1,6 +1,6 @@
 use crate::Database;
 use crate::webserver::AppData;
-use crate::jni::logging::{log, LogLevel};
+use crate::jni::logging::{LogLevel, ConsoleLogItem};
 
 use rusqlite::{named_params, OptionalExtension};
 use actix_web::{web, post, HttpResponse};
@@ -8,6 +8,7 @@ use serde::{Serialize, Deserialize};
 use sha2::{Sha512Trunc256, Digest};
 use std::path::PathBuf;
 use rand::Rng;
+use crate::jni::JvmCommand;
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
@@ -31,9 +32,11 @@ pub async fn post_login(data: web::Data<AppData>, form: web::Form<LoginRequest>)
         ":username": &username
     }, |row| row.get(0)).optional();
 
+    let jvm_command_tx = data.jvm_command_tx.lock().unwrap();
+
     if sql_get_salt_result.is_err() {
-        let tx = data.log_tx.lock().unwrap();
-        log(&tx, LogLevel::Warn, &format!("An error occurred while fetching a user's salt: {:?}", sql_get_salt_result.err().unwrap()));
+        let jvm_command = JvmCommand::log(ConsoleLogItem::new(LogLevel::Warn,format!("An error occurred while fetching a user's salt: {:?}", sql_get_salt_result.err().unwrap())));
+        &jvm_command_tx.send(jvm_command).expect("An issue occurred while sending a JvmCommand");
 
         return HttpResponse::InternalServerError().finish();
     }
@@ -60,8 +63,8 @@ pub async fn post_login(data: web::Data<AppData>, form: web::Form<LoginRequest>)
     }, |row| row.get(0));
 
     if sql_verify_user.is_err() {
-        let tx = data.log_tx.lock().unwrap();
-        log(&tx, LogLevel::Warn, &format!("An error occurred while verifying a user's password: {:?}", sql_verify_user.err().unwrap()));
+        let jvm_command = JvmCommand::log(ConsoleLogItem::new(LogLevel::Warn,format!("An error occurred while verifying a user's password: {:?}", sql_verify_user.err().unwrap())));
+        &jvm_command_tx.send(jvm_command).expect("An issue occurred while sending a JvmCommand");
 
         return HttpResponse::InternalServerError().finish();
     }
@@ -77,8 +80,8 @@ pub async fn post_login(data: web::Data<AppData>, form: web::Form<LoginRequest>)
     });
 
     if sql_insert_session_id.is_err() {
-        let tx = data.log_tx.lock().unwrap();
-        log(&tx, LogLevel::Warn, &format!("An error occurred while inserting a new session_id: {:?}", sql_insert_session_id.err().unwrap()));
+        let jvm_command = JvmCommand::log(ConsoleLogItem::new(LogLevel::Warn,format!("An error occurred while inserting a new session_id: {:?}", sql_insert_session_id.err().unwrap())));
+        jvm_command_tx.send(jvm_command).expect("An issue occurred while sending a JvmCommand");
 
         return HttpResponse::InternalServerError().finish();
     }

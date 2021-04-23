@@ -1,10 +1,11 @@
 use actix_web::{HttpResponse, web, post};
 use serde::{Serialize, Deserialize};
-use crate::jni::logging::{LogLevel, log};
+use crate::jni::logging::{LogLevel, ConsoleLogItem};
 use crate::endpoints::console::CombinedLogEntry;
 use crate::database::Database;
 use std::path::PathBuf;
 use rusqlite::named_params;
+use crate::jni::JvmCommand;
 
 #[derive(Deserialize)]
 pub struct LogRequest {
@@ -25,8 +26,9 @@ pub async fn post_logs_all(data: web::Data<crate::webserver::AppData>, form: web
     }, |row| row.get(0));
 
     if sql_check_session.is_err() {
-        let tx = data.log_tx.lock().unwrap();
-        log(&tx, LogLevel::Warn, &format!("An error occurred while verifying a session_id: {:?}", sql_check_session.err().unwrap()));
+        let tx = data.jvm_command_tx.lock().unwrap();
+        let jvm_command = JvmCommand::log(ConsoleLogItem::new(LogLevel::Warn,format!("An error occurred while verifying a session_id: {:?}", sql_check_session.err().unwrap()) ));
+        tx.send(jvm_command).expect("An issue occurred while sending a JvmCommand");
 
         return HttpResponse::InternalServerError().finish();
     }

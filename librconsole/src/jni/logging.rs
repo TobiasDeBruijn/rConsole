@@ -1,5 +1,4 @@
 use jni::JNIEnv;
-use std::sync::mpsc::{Receiver, Sender};
 use crate::jni::util::str_to_jvalue;
 
 /**
@@ -10,6 +9,15 @@ pub struct ConsoleLogItem {
     pub log: String
 }
 
+impl ConsoleLogItem {
+    pub fn new(level: LogLevel, log: String) -> ConsoleLogItem {
+        ConsoleLogItem {
+            level,
+            log
+        }
+    }
+}
+
 /**
 Enum describing the available console logging levels
 */
@@ -18,39 +26,6 @@ pub enum LogLevel {
     Info,
     Warn,
     Debug
-}
-
-/**
-Log to the console
-
-## Parameters
-    tx: Reference to the Sender on which to send the log message
-    level: The level to log at
-    message: The message to log
-*/
-#[warn(dead_code)]
-pub fn log(tx: &Sender<ConsoleLogItem>, level: LogLevel, message: &str) {
-    let _ = tx.send(ConsoleLogItem { level, log: message.to_string() });
-}
-
-/**
-Listen for incoming logging packets on `rx`
-**This is a blocking method**
-
-## Parameters
-    env: The JNIEnv on which to log
-    rx: The Receiver on which ConsoleLogItems will be coming in
-
-*/
-pub fn logging_rec(env: JNIEnv, log_rx: Receiver<ConsoleLogItem>) {
-    loop {
-        let rec = log_rx.recv().unwrap();
-        match rec.level {
-            LogLevel::Info => log_info(&env, &rec.log),
-            LogLevel::Warn => log_warn(&env, &rec.log),
-            LogLevel::Debug => log_debug(&env, &rec.log)
-        }
-    }
 }
 
 /**
