@@ -104,6 +104,15 @@
                 color: #CAD1D9; 
                 @include set-font($roboto, 400);
             }
+
+            .stop-server-btn:hover {
+                background-color: darken(#E52C33, 10%);
+                border: 1px solid darken(#E52C33, 10%);
+            }
+
+            button:hover {
+                cursor: pointer;
+            }
         }
     }
 }

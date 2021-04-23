@@ -41,9 +41,7 @@ export async function setupConsoleLoop() {
 
         let consoleNew = getLogs();
         consoleNew.then((e) => {
-            //If the user has scrolled up less than 10%, we will scroll them to the bottom
-            let shouldScroll = (CONSOLE_VIEW.scrollTop/CONSOLE_VIEW.scrollHeight >= 1 - 0.1);
-
+            //If the user has scrolled up less than 0.2%, we will scroll them to the bottom
             let parseSuccessful = parseConsoleResponse(e);
             if(!parseSuccessful) {
                 console.error("An error occurred while parsing the log responses.");
@@ -51,10 +49,6 @@ export async function setupConsoleLoop() {
                 window.clearInterval(fetchLogsInterval)
                 //TODO add an error box on the frontend
                 return;
-            }
-
-            if(shouldScroll) {
-                CONSOLE_VIEW.scrollTo(0, CONSOLE_VIEW.scrollHeight);
             }
         });
     }, 500);
@@ -66,8 +60,11 @@ async function handleCommandInput() {
 
     let noLogEntry = document.createElement('div');
     noLogEntry.classList.value = "LOG_NO_INDEX";
-    noLogEntry.innerHTML = ">" + COMMAND_INPUT.value;
 
+    let noLogEntryTextHolder = document.createElement('p');
+    noLogEntryTextHolder.innerHTML = ">" + COMMAND_INPUT.value;
+
+    noLogEntry.appendChild(noLogEntryTextHolder);
     CONSOLE_VIEW.appendChild(noLogEntry);
 
     let execCommandReq = $.ajax({
@@ -198,6 +195,10 @@ function parseConsoleResponse(response: ILogResponse, emptyConsole = false): boo
 
         CONSOLE_VIEW.appendChild(logEntry);
     });
+
+    if(response.logs.length > 0) {
+        CONSOLE_VIEW.scrollTo(0, CONSOLE_VIEW.scrollHeight);
+    }
 
     return true;
 }
