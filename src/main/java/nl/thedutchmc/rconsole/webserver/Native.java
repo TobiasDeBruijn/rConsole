@@ -1,6 +1,7 @@
 package nl.thedutchmc.rconsole.webserver;
 
 import java.util.HashMap;
+
 import nl.thedutchmc.rconsole.annotations.Nullable;
 
 /**
@@ -70,5 +71,5 @@ public class Native {
 	 * Start the command listening Thread<br>
 	 * This is a blocking method
 	 */
-	protected native static void startCommandListenThread();
+	protected native static void startCommandListenThread();	
 }

@@ -1,6 +1,6 @@
 import AnsiUp from '../extlib/ansi_up';
 
-import { CONSOLE_ALL_ENDPOINT, CONSOLE_NEW_ENDPOINT } from '../config';
+import { CONSOLE_ALL_ENDPOINT, CONSOLE_COMMAND_ENDPOINT, CONSOLE_NEW_ENDPOINT } from '../config';
 import { setup                                      } from '../index';
 import { ILogResponse, LogAttribute                 } from '../server_types';
 import { getCookie                                  } from '../util';
@@ -18,6 +18,13 @@ export async function setupConsoleLoop() {
     await setup();
     const CONSOLE_VIEW = document.getElementById("console-view");
 
+    let commandInputField = document.getElementById("console-input");
+    commandInputField.addEventListener("keypress", (e) => {
+        if(e.key == 'Enter') {
+            handleCommandInput();
+        }
+    })
+
     let consoleAll = getLogs(false);
     consoleAll.then((e) => {
         parseConsoleResponse(e);
@@ -34,11 +41,7 @@ export async function setupConsoleLoop() {
         let consoleNew = getLogs();
         consoleNew.then((e) => {
             //If the user has scrolled up less than 10%, we will scroll them to the bottom
-            let scrollPerc = CONSOLE_VIEW.scrollTop / CONSOLE_VIEW.scrollHeight;
-            console.log("scrollTop: " + CONSOLE_VIEW.scrollTop);
-            console.log("ScrollH::  " + CONSOLE_VIEW.scrollHeight);
-            console.log(scrollPerc)
-            let shouldScroll = (CONSOLE_VIEW.scrollTop/CONSOLE_VIEW.scrollHeight <= 1 - 0.25);
+            let shouldScroll = (CONSOLE_VIEW.scrollTop/CONSOLE_VIEW.scrollHeight >= 1 - 0.1);
 
             let parseSuccessful = parseConsoleResponse(e);
             if(!parseSuccessful) {
@@ -53,7 +56,35 @@ export async function setupConsoleLoop() {
                 CONSOLE_VIEW.scrollTo(0, CONSOLE_VIEW.scrollHeight);
             }
         });
-    }, 5000);
+    }, 500);
+}
+
+async function handleCommandInput() {
+    const COMMAND_INPUT = <HTMLInputElement> document.getElementById("console-input");
+    const CONSOLE_VIEW = document.getElementById('console-view');
+
+    let noLogEntry = document.createElement('div');
+    noLogEntry.classList.value = "LOG_NO_INDEX";
+    noLogEntry.innerHTML = ">" + COMMAND_INPUT.value;
+
+    CONSOLE_VIEW.appendChild(noLogEntry);
+
+    let execCommandReq = $.ajax({
+        url: CONSOLE_COMMAND_ENDPOINT,
+        method: 'POST',
+        data: {
+            session_id: getCookie('sessionid'),
+            command: COMMAND_INPUT.value
+        }
+    });
+
+    execCommandReq.fail((e) => {
+        console.error(e);
+    });
+
+    execCommandReq.done((e) => {
+        COMMAND_INPUT.value = "";
+    });
 }
 
 /**
@@ -116,6 +147,11 @@ function parseConsoleResponse(response: ILogResponse, emptyConsole = false): boo
         return false;
     }
 
+    //The request was successful, but there were no new log entries
+    if(response.status == 200 && response.logs == null) {
+        return true;
+    } 
+
     const CONSOLE_VIEW = document.getElementById("console-view");
 
     //If the emptyConsole flag is true, we need to remove all of CONSOLE_VIEW's children
@@ -138,6 +174,7 @@ function parseConsoleResponse(response: ILogResponse, emptyConsole = false): boo
 
     //Iterate over every LogEntry returned from the server,
     response.logs.forEach((e) => {
+        if(e.id.toString() == lastLogEntryId) return;
         let logEntry = document.createElement("div");
 
         //If the returned LogEntry has the LogNoIndex attribute,
@@ -150,7 +187,9 @@ function parseConsoleResponse(response: ILogResponse, emptyConsole = false): boo
         }
 
         //TODO Timestamp from Epoch to [HH:mm:ss]
-        logEntry.innerHTML = "[" + e.log_entry.thread + "/" + e.log_entry.level + "] " + ANSI_UP.ansi_to_html(e.log_entry.message);
+        let date = new Date(e.log_entry.timestamp);
+        let timestampFormatted = "[" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
+        logEntry.innerHTML = timestampFormatted + " [" + e.log_entry.thread + "/" + e.log_entry.level + "]: " + ANSI_UP.ansi_to_html(e.log_entry.message);
         
         CONSOLE_VIEW.appendChild(logEntry);
     });

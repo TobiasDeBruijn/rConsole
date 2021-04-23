@@ -4,6 +4,84 @@
 @use '../incl/color' as *;
 @use '../incl/font' as *;
 
-.page-root {
-    visibility: visible;
+.dashboard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+
+    @media screen and(max-width: 600px) {
+        flex-direction: column;
+    }
+
+    padding: 0;
+    margin: 0;
+    padding-top: 5vw;
+
+    background-color: #32404E;
+    visibility: visible !important;
+    height: 100vh;
+
+}
+
+.console-root {
+    padding: 2px;
+    background-color: black;
+    border: 1px solid black;
+    border-radius: 5px;
+    height: calc(50vh + 1em);
+}
+
+.server-control-root {
+    background-color: #3E4D5B;
+    border: 1px solid #3E4D5B;
+    border-top: none;
+    border-radius: 5px;
+    height: 20vh;
+    width: 25vw;
+
+    padding: 0;
+    
+    .server-control-holder {
+        padding-top: 0;
+        margin-top: 0;
+        height: 100%;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+ 
+        .server-name {
+            background-color: #1E2934;
+            border: 1px solid #1E2934;
+            width: 100%;
+            height: 2em;
+
+            @include set-font($roboto, 400);
+            color: #CAD1D9;
+            margin: 0;
+
+            text-align: left;
+            line-height: 2em;
+        }
+
+        .server-stats-holder {
+            //TODO
+        }
+
+        .server-control-btns {
+            display: flex;
+            flex-direction: row;
+
+            padding: 10px;
+
+            .stop-server-btn {
+                background-color: #E52C33;
+                border: 1px solid #E52C33;
+                border-radius: 2px;
+                padding: 3px 5px 3px 5px;
+                color: #CAD1D9; 
+                @include set-font($roboto, 400);
+            }
+        }
+    }
 }

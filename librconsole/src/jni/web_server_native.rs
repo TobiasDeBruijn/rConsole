@@ -424,5 +424,7 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startCommand
     let rx_lock = crate::RX_COMMANDS.lock().unwrap();
     let rx=  rx_lock.take().unwrap();
 
+    log_info(&env, "Now listening for console commands.");
+
     crate::jni::command_rx(env, rx);
 }

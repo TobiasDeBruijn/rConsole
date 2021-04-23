@@ -3,6 +3,8 @@ package nl.thedutchmc.rconsole;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -64,12 +66,15 @@ public class RConsole extends JavaPlugin {
 				}
 			}, "rConsole-librconsole-server-Thread").start();
 			
-			new Thread(new Runnable() {
+			Thread commandThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					RConsole.this.nativeWebServer.startCommandListenThread();
 				}
 			}, "rConsole-librconsole-command-Thread");
+			
+	    	final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
+	    	scheduler.schedule(() -> commandThread.start(), 10, TimeUnit.SECONDS);
 		} else {
 			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}

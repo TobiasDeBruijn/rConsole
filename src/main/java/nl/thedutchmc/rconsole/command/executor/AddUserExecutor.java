@@ -14,7 +14,7 @@ public class AddUserExecutor implements PluginCommand {
 	private RConsole plugin;
 	public AddUserExecutor(RConsole plugin) {
 		this.plugin = plugin;
-		
+	
 		plugin.commandLoader.registerSimple("adduser", "rconsole", null, this);
 	}
 	

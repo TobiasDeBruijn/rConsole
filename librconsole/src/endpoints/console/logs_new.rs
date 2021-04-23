@@ -47,6 +47,10 @@ pub async fn post_logs_new(data: web::Data<crate::webserver::AppData>, form: web
         return HttpResponse::Ok().json(LogResponse { status: 404, logs: None});
     }
 
+    if since == *pinned.keys().last().unwrap() {
+        return HttpResponse::Ok().json(LogResponse { status: 200, logs: None});
+    }
+
     let mut combined_entries: Vec<CombinedLogEntry> = vec![];
     for i in since..pinned.len() as u32 {
         let v = pinned.get(&i).unwrap();

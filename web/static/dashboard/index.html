@@ -35,14 +35,25 @@
             </div>
         </nav>
 
-        <main style="visibility: hidden;">
-            <div class="page-root">
+        <main style="visibility: hidden;" class="dashboard">
+            <div class="server-control-root">
+                <div class="server-control-holder">
+                    <p class="server-name" id="server-name">Minecraft</p>
+                    <div class="server-stats-holder">
+                        <div class="server-stat" id="memory-stat">//TODO: server stats</div>
+                    </div>
+                    <div class="server-control-btns">
+                        <button class="stop-server-btn" id="stop-server-btn">Stop</button>
+                    </div>
+                </div>
+            </div>
+            <div class="console-root">
                 <div class="console-holder">
                     <div id="console-view" class="console-view">
                     </div>
 
                     <div class="input-view">
-                        <div>&gt;</div>
+                        <p>&gt;</p>
                         <input type="text" id="console-input" aria-label="Console Command Input">
                     </div>
                 </div>

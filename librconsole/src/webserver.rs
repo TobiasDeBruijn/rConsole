@@ -33,6 +33,7 @@ pub async fn start(config: Config, log_tx: Sender<ConsoleLogItem>, command_tx: S
             .wrap(cors)
             .service(crate::endpoints::console::all_logs::post_logs_all)
             .service(crate::endpoints::console::logs_new::post_logs_new)
+            .service(crate::endpoints::console::execute_command::post_execute_command)
             .service(crate::endpoints::auth::login::post_login)
             .service(Files::new("/", &static_files_path)
                 .prefer_utf8(true)

@@ -6,8 +6,8 @@ TS_SOURCE_FILES := $(shell find web/src/ts -type f)
 SCSS_SOURCE_FILES := $(shell find web/src/scss -type f)
 STATIC_WEB_CONTENT := $(shell find web -type f -name "*.html")
 
-#NPROCS = $(shell grep -c 'processor' /proc/cpuinfo)
-#MAKEFLAGS += -j$(NPROCS)
+NPROCS = $(shell grep -c 'processor' /proc/cpuinfo)
+MAKEFLAGS += -j$(NPROCS)
 
 librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so: ${RUST_SOURCE_FILES}
 	cd librconsole; \

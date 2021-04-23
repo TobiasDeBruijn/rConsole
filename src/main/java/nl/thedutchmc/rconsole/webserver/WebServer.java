@@ -12,6 +12,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
@@ -32,10 +34,10 @@ import nl.thedutchmc.rconsole.util.Util;
 public class WebServer {
 
 	private static boolean LIB_LOADED = false;
-	private RConsole plugin;
+	private static RConsole plugin;
 	
 	public WebServer(RConsole plugin) {
-		this.plugin = plugin;
+		WebServer.plugin = plugin;
 	}
 	
 	static {
@@ -107,7 +109,7 @@ public class WebServer {
 		}
 		
 		//Create the configuration folder for librconsole if it doesn't exist.
-		File librconsoleConfigFolder = new File(this.plugin.getDataFolder() + File.separator + "librconsole");
+		File librconsoleConfigFolder = new File(WebServer.plugin.getDataFolder() + File.separator + "librconsole");
 		if(!librconsoleConfigFolder.exists()) {
 			librconsoleConfigFolder.mkdirs();
 		}
@@ -118,10 +120,10 @@ public class WebServer {
 			//The variables in here aren't actually unused, they're serialized by Yaml
 			
 			@SuppressWarnings("unused")
-			public int port = WebServer.this.plugin.config.getConfig().getLibrconsolePort();
+			public int port = WebServer.plugin.config.getConfig().getLibrconsolePort();
 			
 			@SuppressWarnings("unused")
-			public String pepper = WebServer.this.plugin.config.getConfig().getPepper();
+			public String pepper = WebServer.plugin.config.getConfig().getPepper();
 		}
 		
 		//Serialize the LibrconsoleConfig object to a Yaml String
@@ -184,10 +186,10 @@ public class WebServer {
 		//We always want to re-extract the zip file, because if there is an update to the plugin
 		//the static web files also need to be updated. By deleting it every time,
 		//we can guarantee that the files are always up to date.
-		this.plugin.saveResource("dist.zip", true);
+		WebServer.plugin.saveResource("dist.zip", true);
 		try {
 			File finalDistZipFile = new File(staticFilesFolder, "dist.zip");
-			Files.move(new File(this.plugin.getDataFolder(), "dist.zip").toPath(), finalDistZipFile.toPath());
+			Files.move(new File(WebServer.plugin.getDataFolder(), "dist.zip").toPath(), finalDistZipFile.toPath());
 			new ZipFile(finalDistZipFile).extractAll(staticFilesFolder.getAbsolutePath());
 			
 			finalDistZipFile.delete();
@@ -218,7 +220,7 @@ public class WebServer {
 		private WebConfig() {}
 		
 		@SuppressWarnings("unused")
-		private String uri = WebServer.this.plugin.config.getConfig().getBaseUrl();
+		private String uri = WebServer.plugin.config.getConfig().getBaseUrl();
 	}
 	
 	/**
@@ -323,5 +325,32 @@ public class WebServer {
 		}	
 		
 		Native.startCommandListenThread();
+	}
+	
+	/**
+	 * Execute a command<br>
+	 * This is a wrapper method around {@link Bukkit#dispatchCommand(org.bukkit.command.CommandSender, String)}, this is because we need to sync with the main server thread.<br>
+	 * This method is for native methods to call.
+	 * @param cmd The command to execute
+	 */
+	//Private method because you shouldn't call it from java, and native code does not care about visibility modifiers.
+	//The function is used, but again, from native code
+	//
+	//In theory we don't need this method, but reimplementing this with JNI is a massive pain
+	@SuppressWarnings("unused")
+	private static void execCommand(String cmd) {
+		//We're doing a try/catch on all Exceptions, because if an exception occurs and it is not caught in Java code,
+		//but is caught in native code instead, it could crash the JVM
+		try {
+			new BukkitRunnable() {
+				
+				@Override
+				public void run() {
+					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+				}
+			}.runTask(WebServer.plugin);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
