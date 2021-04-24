@@ -80,7 +80,10 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
 
     //Start the HTTP server
     std::thread::spawn(move || {
-        let _ = crate::webserver::start(config,database_file_path, static_files_path, jvm_command_tx);
+        let webserver_start = crate::webserver::start(config,database_file_path, static_files_path, jvm_command_tx);
+        if webserver_start.is_err() {
+            panic!("An error occurred while running the Actix web server: {:?}", webserver_start.err().unwrap());
+        }
     });
 
     jvm_command_exec(env, jvm_command_rx);

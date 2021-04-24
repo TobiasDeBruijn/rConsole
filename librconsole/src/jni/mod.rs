@@ -141,12 +141,12 @@ impl Method {
         args: The Arguments to be passed to the method. The order should be the same as provided in the method's signature. If no arguments are needed, an empty Vec should be provided
     */
     #[allow(dead_code)]
-    pub fn method(obj: jobject, name: String, sig: String, args: Vec<Argument>) -> Method {
+    pub fn method(obj: jobject, name: &str, sig: &str, args: Vec<Argument>) -> Method {
         Method {
             class: None,
             obj: Some(obj),
-            name,
-            sig,
+            name: name.to_string(),
+            sig: sig.to_string(),
             args
         }
     }
@@ -166,7 +166,13 @@ pub enum Argument {
 
 pub fn jvm_command_exec(env: JNIEnv, rx: Receiver<JvmCommand>) {
     loop {
-        let received_cmd = rx.recv().unwrap();
+        let received_cmd_wrapped = rx.recv();
+        if received_cmd_wrapped.is_err() {
+            eprintln!("An error occurred while receiving on the jvm_command_exec Receiver: {:?}", received_cmd_wrapped.err().unwrap());
+            std::process::exit(1);
+        }
+
+        let  received_cmd = received_cmd_wrapped.unwrap();
         match received_cmd.intent {
             Intent::Log(log_item) => {
                 match log_item.level {

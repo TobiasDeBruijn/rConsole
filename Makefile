@@ -37,11 +37,11 @@ web/node_modules:
 	cd web; \
 		npm i
 
-web/dist/dist.js: $(wildcard web/node_modules) ${TS_SOURCE_FILES} ${SCSS_SOURCE_FILES}
+web/dist/dist.js: web/node_modules ${TS_SOURCE_FILES} ${SCSS_SOURCE_FILES}
 	cd web; \
 		npx webpack
 
-web/dist/ansi_up.js: $(wildcard web/node_modules/ansi_up/ansi_up.js)
+web/dist/ansi_up.js: web/node_modules
 	cp web/node_modules/ansi_up/ansi_up.js web/dist/ansi_up.js
 
 web/dist.zip: web/dist/dist.js web/dist/ansi_up.js ${STATIC_WEB_CONTENT}

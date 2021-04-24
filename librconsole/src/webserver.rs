@@ -32,13 +32,14 @@ pub async fn start(config: Config, db_path: String, static_files_path: String, j
             .service(crate::endpoints::console::logs_new::post_logs_new)
             .service(crate::endpoints::console::execute_command::post_execute_command)
             .service(crate::endpoints::auth::login::post_login)
+            .service(crate::endpoints::stats::cpu::post_get_load_avg)
+            .service(crate::endpoints::stats::mem::post_get_mem)
             .service(Files::new("/", &static_files_path)
                 .prefer_utf8(true)
                 .index_file("index.html")
                 .show_files_listing()
             )
     })
-    .bind(format!("0.0.0.0:{}", port))?
     .bind(format!("[::]:{}", port))?
     .run()
     .await
