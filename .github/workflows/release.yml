@@ -60,9 +60,9 @@ jobs:
     - name: Build OSXCross
       run: cd /tmp/osxcross && UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
     - name: Make OSX NDK Directory
-      run: sudo mkdir -p /usr/local/osx-ndk-x86
+      run: sudo sudo mkdir -p /usr/local/osx-ndk-x86
     - name: Copy OSX NDK
-      run: cp -r /tmp/osxcross/target/* /usr/local/osx-ndk-x86
+      run: sudo cp -r /tmp/osxcross/target/* /usr/local/osx-ndk-x86
 
     #Build
     - name: Build
