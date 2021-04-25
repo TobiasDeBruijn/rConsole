@@ -4,7 +4,7 @@ servers:
     url: https://virtserver.swaggerhub.com/TheDutchMC/rConsole/1.0.0
 info:
   description: rConsole HTTP API
-  version: "0.3.0"
+  version: "0.4.0"
   title: rConsole HTTP API
   contact:
     email: github@thedutchmc.nl
