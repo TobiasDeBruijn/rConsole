@@ -50,6 +50,8 @@ public class WebServer {
 				nativeLibraryName = "/x86_64/linux/librconsole.so";
 			} else if(osString.contains("windows")) {
 				nativeLibraryName = "/x86_64/windows/librconsole.dll";
+			} else if(osString.contains("mac")) {
+				nativeLibraryName = "/x86_64/macos/librconsole.dylib";
 			} else {
 				RConsole.logWarn(String.format("You are running on an OS not supported by rConsole (%s). The built-in webserver will not work.", osString));
 				break saveNativeLib;

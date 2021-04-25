@@ -82,6 +82,26 @@ Rustup targets:
 - `x86_64-unknown-linux-gnu`  
 - `x86_64-pc-windows-gnu`  
 
+**MacOS**  
+Because we also want MacOS support, we need to do some extra work.
+1. `rustup target add x86_64-apple-darwin`
+2. Append to `~/.cargo/config`:
+```
+[target.x86_64-apple-darwin]
+linker = "x86_64-apple-darwin14-clang"
+ar = "x86_64-apple-darwin14-ar"
+```
+3. `git clone https://github.com/tpoechtrager/osxcross`
+4. `cd osxcross`
+5. `wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz`
+6. `mv MacOSX10.11.sdk.tar.xz tarballs/`
+7. `sed -i -e 's|-march=native||g' build_clang.sh build.sh`
+8. `UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh`
+9. `sudo mkdir -p /usr/local/osx-ndk-x86`
+10. `sudo cp -r target/* /usr/local/osx-ndk-x86` 
+
+The Makefile will take care of the rest, assuming you've followed the instructions above.
+
 To then build the project all you'd need to do is run `make`. This will build a `releasejar`, to create a `testjar` run `make testjar`.  
 a `releasejar` will be outputted to `$projectRoot/releases`, a `testjar` will be outputted to `$projectRoot/server/plugins`
 

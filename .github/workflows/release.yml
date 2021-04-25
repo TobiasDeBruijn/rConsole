@@ -36,6 +36,35 @@ jobs:
     - name: Install Rustup x86_64 Linux target
       run: rustup target install x86_64-unknown-linux-gnu
 
+    #MacOS
+    - name: APT dependencies for MacOS
+      run: apt install clang g++ zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+    - name: Install Rustup x86_64 MacOS target
+      run: rustup target add x86_64-apple-darwin
+    - name: Configure Cargo
+      uses: DamianReeves/write-file-action
+      with:
+        path: ${{ env.home}}/.cargo/config
+        contents: |
+          [target.x86_64-apple-darwin]
+          linker = "x86_64-apple-darwin14-clang"
+          ar = "x86_64-apple-darwin14-ar"
+        write-mode: append
+    - name: Clone OSXCross
+      run: git clone https://github.com/tpoechtrager/osxcross /tmp/osxcross/
+    - name: Download MacOS SDK
+      run: wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz -O /tmp/osxcross/
+    - name: Move MacOS SDK to Tarballs
+      run: mv /tmp/osxcross/MacOSX10.11.sdk.tar.xz /tmp/osxcross/tarballs/
+    - name: Sed in build.sh
+      run: cd /tmp/osxcross && sed -i -e 's|-march=native||g' build_clang.sh build.sh
+    - name: Build OSXCross
+      run: cd /tmp/osxcross && UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
+    - name: Make OSX NDK Directory
+      run: sudo mkdir -p /usr/local/osx-ndk-x86
+    - name: Copy OSX NDK
+      run: sudo cp -r target/* /usr/local/osx-ndk-x86
+
     #Build
     - name: Build
       run: make ghactions 

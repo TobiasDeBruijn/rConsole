@@ -9,6 +9,11 @@ STATIC_WEB_CONTENT := $(shell find web -type f -name "*.html")
 NPROCS = $(shell grep -c 'processor' /proc/cpuinfo)
 MAKEFLAGS += -j$(NPROCS)
 
+librconsole/target/x86_64-apple-darwin/release/librconsole.dylib: ${RUST_SOURCE_FILES}
+	cd librconsole; \
+		CXX=/usr/local/osx-ndk-x86/bin/o65-clang++ CC=/usr/local/osx-ndk-x86/bin/o64-clang LIBZ_SYS_STATIC=1 PKG_CONFIG_ALLOW_CROSS=1 cargo build --lib --release --target x86_64-apple-darwin
+	mv librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
+
 librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so: ${RUST_SOURCE_FILES}
 	cd librconsole; \
 		cargo build --lib --release --target x86_64-unknown-linux-gnu
@@ -18,17 +23,17 @@ librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll: ${RUST_SOURCE_
 	cd librconsole; \
 		cargo build --lib --release --target x86_64-pc-windows-gnu
 
-testjar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
+testjar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew testjar
 
-releasejar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
+releasejar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew releasejar
 
-ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
+ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew ghActions

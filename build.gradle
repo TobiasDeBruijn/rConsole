@@ -80,6 +80,7 @@ task ghActions(type: ShadowJar) {
 task copyExternalDependencies() {
 	dependsOn('copyWindowsLibrary')
 	dependsOn('copyLinuxLibrary')
+	dependsOn('copyMacLibrary')
 	dependsOn('copyWebFiles')
 }
 
@@ -98,3 +99,7 @@ task copyWindowsLibrary(type: Copy) {
 	into "$buildDir/resources/main/x86_64/windows/"
 }
 
+task copyMacLibrary(type: Copy) {
+	from "$rootDir/librconsole/target/x86_64-apple-darwin/release/librconsole.dylib"
+	into "$buildDir/resources/main/x86_64/macos/"
+}
