@@ -41,8 +41,7 @@ jobs:
       run: apt install clang g++ zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
     - name: Install Rustup x86_64 MacOS target
       run: rustup target add x86_64-apple-darwin
-    - name: Configure Cargo
-      uses: DamianReeves/write-file-action
+    - uses: DamianReeves/write-file-action
       with:
         path: ${{ env.home}}/.cargo/config
         contents: |
