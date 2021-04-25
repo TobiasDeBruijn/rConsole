@@ -43,7 +43,7 @@ jobs:
       run: rustup target add x86_64-apple-darwin
     - uses: DamianReeves/write-file-action@v1.0
       with:
-        path: ${{ env.home}}/.cargo/config
+        path: ~/.cargo/config
         contents: |
           [target.x86_64-apple-darwin]
           linker = "x86_64-apple-darwin14-clang"
