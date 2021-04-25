@@ -38,7 +38,7 @@ jobs:
 
     #MacOS
     - name: APT dependencies for MacOS
-      run: apt install clang g++ zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+      run: sudo apt install clang g++ zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
     - name: Install Rustup x86_64 MacOS target
       run: rustup target add x86_64-apple-darwin
     - uses: DamianReeves/write-file-action@v1.0
