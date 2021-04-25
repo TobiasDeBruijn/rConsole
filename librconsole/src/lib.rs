@@ -13,6 +13,7 @@ mod config;
 mod webserver;
 mod endpoints;
 mod database;
+mod metrics;
 
 lazy_static! {
     pub static ref LOG_BUFFER: Arc<HashMap<u32, LogEntry>> = Arc::new(flurry::HashMap::new());

@@ -3,6 +3,8 @@ package nl.thedutchmc.rconsole;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.gson.Gson;
@@ -65,11 +67,7 @@ public class RConsole extends JavaPlugin {
 		} else {
 			RConsole.logInfo("Config option 'useWebServer' is set to false. Skipping.");
 		}
-		
-		Runtime.getRuntime().totalMemory();
-		Runtime.getRuntime().freeMemory();
-		Runtime.getRuntime().maxMemory();
-		
+				
 		//Start the console appender
 		this.readConsoleFeature = new ReadConsole(this.nativeWebServer);
 	}

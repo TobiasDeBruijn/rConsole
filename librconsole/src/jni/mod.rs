@@ -39,7 +39,9 @@ impl JvmCommand {
     */
     pub fn get_class(class_name: &str) -> (JvmCommand, Receiver<*mut _jobject>) {
         let (tx, rx): (Sender<*mut _jobject>, Receiver<*mut _jobject>) = channel();
-        let intent = Intent::GetClass(class_name.to_string());
+        //Class names in JNI are e.g java/lang/String, but I often make the mistake of writing java.lang.String because thats how you'd write it in Java
+        //So we just replace '.' with '/'
+        let intent = Intent::GetClass(class_name.to_string().replace(".", "/"));
 
         let command = JvmCommand {
             intent,
@@ -126,7 +128,9 @@ impl Method {
             class: Some(class),
             obj: None,
             name: name.to_string(),
-            sig: sig.to_string(),
+            //Class names in JNI are e.g java/lang/String, but I often make the mistake of writing java.lang.String because thats how you'd write it in Java
+            //So we just replace '.' with '/'
+            sig: sig.to_string().replace(".", "/"),
             args
         }
     }
@@ -146,7 +150,9 @@ impl Method {
             class: None,
             obj: Some(obj),
             name: name.to_string(),
-            sig: sig.to_string(),
+            //Class names in JNI are e.g java/lang/String, but I often make the mistake of writing java.lang.String because thats how you'd write it in Java
+            //So we just replace '.' with '/'
+            sig: sig.to_string().replace(".", "/"),
             args
         }
     }
