@@ -52,7 +52,7 @@ jobs:
     - name: Clone OSXCross
       run: git clone https://github.com/tpoechtrager/osxcross /tmp/osxcross/
     - name: Download MacOS SDK
-      run: wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz -O /tmp/osxcross/
+      run: wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz -O /tmp/osxcross/MacOSX10.11.sdk.tar.xz
     - name: Move MacOS SDK to Tarballs
       run: mv /tmp/osxcross/MacOSX10.11.sdk.tar.xz /tmp/osxcross/tarballs/
     - name: Sed in build.sh
