@@ -12,6 +12,7 @@
         <title>rConsole Dashboard</title>
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js" integrity="sha512-VMsZqo0ar06BMtg0tPsdgRADvl0kDHpTbugCBBrL55KmucH6hP9zWdLIWY//OTfMnzz6xWQRxQqsUFefwHuHyg==" crossorigin="anonymous"></script>
         <script src="/dist/ansi_up.js"></script>
         <script src="/dist/dist.js"></script>
     </head>
@@ -36,8 +37,8 @@
         </nav>
 
         <main style="visibility: hidden;" class="dashboard">
-            <div class="server-control-root">
-                <div class="server-control-holder">
+            <div>
+                <div class="server-control-root">
                     <p class="server-name" id="server-name">Minecraft</p>
                     <div class="server-stats-holder">
                         <div class="server-stat" id="memory-stat">//TODO: server stats</div>
@@ -46,11 +47,8 @@
                         <button class="stop-server-btn" id="stop-server-btn">Stop</button>
                     </div>
                 </div>
-            </div>
-            <div class="console-root">
-                <div class="console-holder">
-                    <div id="console-view" class="console-view">
-                    </div>
+                <div class="console-root">
+                    <div id="console-view" class="console-view"></div>
 
                     <div class="input-view">
                         <p>&gt;</p>
@@ -58,10 +56,27 @@
                     </div>
                 </div>
             </div>
+            <div>
+                <div class="graph-holder">
+                    <div>
+                        <h2>CPU Usage</h2>
+                        <div>
+                            <canvas id="cpu-graph"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h2>Memory Usage</h2>
+                        <div>
+                            <canvas id="mem-graph"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
         <script>
             rConsole.setupDashboard();
             rConsole.setupConsoleLoop();
+            rConsole.setupCharts();
         </script>
     </body>
 </html>

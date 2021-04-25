@@ -17,7 +17,7 @@ export async function isLoggedIn(): Promise<boolean> {
     });
 
     isLoggedInReq.fail((e) => {
-        console.log(e);
+        console.error(e);
     });
 
     let isLoggedInResponse = await isLoggedInReq;

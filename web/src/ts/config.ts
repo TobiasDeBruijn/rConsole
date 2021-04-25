@@ -14,9 +14,12 @@ export async function loadConfig() {
 
     LOGIN_ENDPOINT =            config.uri + "/auth/login";
     SESSION_ENDPOINT =          config.uri + "/auth/session";
+
     CONSOLE_NEW_ENDPOINT =      config.uri + "/console/new";
     CONSOLE_ALL_ENDPOINT =      config.uri + "/console/all";
     CONSOLE_COMMAND_ENDPOINT =  config.uri + "/console/command";
+
+    METRIC_ENDPOINT =           config.uri + "/stats/metrics";
 }
 
 export let LOGIN_ENDPOINT:              string;
@@ -24,6 +27,6 @@ export let SESSION_ENDPOINT:            string;
 
 export let CONSOLE_ALL_ENDPOINT:        string;
 export let CONSOLE_NEW_ENDPOINT:        string;
-export let CONSOLE_COMMAND_ENDPOINT:    string
+export let CONSOLE_COMMAND_ENDPOINT:    string;
 
-console.log(1);
+export let METRIC_ENDPOINT:             string;

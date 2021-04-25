@@ -4,6 +4,7 @@ import { loadConfig } from "./config";
 export { setupLoginPage     } from "./login";
 export { setupDashboard     } from "./dashboard/dashboard";
 export { setupConsoleLoop   } from "./dashboard/console";
+export { setupCharts        } from "./dashboard/charts";
 
 export async function showDefaultHidden() {
     let allDefaultHidden = document.querySelectorAll("[data-default-hidden]");

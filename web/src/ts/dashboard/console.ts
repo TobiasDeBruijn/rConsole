@@ -4,7 +4,6 @@ import { CONSOLE_ALL_ENDPOINT, CONSOLE_COMMAND_ENDPOINT, CONSOLE_NEW_ENDPOINT } 
 import { setup                                      } from '../index';
 import { ILogResponse, LogAttribute                 } from '../server_types';
 import { getCookie                                  } from '../util';
-import { parseJsonSourceFileConfigFileContent } from '../../../node_modules/typescript/lib/typescript';
 
 const ANSI_UP = new AnsiUp();
 

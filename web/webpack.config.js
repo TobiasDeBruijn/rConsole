@@ -13,8 +13,9 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
-                loader: 'ts-loader'
+                test: /\.ts?$/,
+                exclude: /node_modules/,
+                loader: 'awesome-typescript-loader'
             },
             {
                 test: /\.scss$/,
@@ -27,7 +28,8 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: [ '.ts', '.js', '.css', '.sass', '.scss' ],
+        extensions: [ '.ts', '.js', '.css', '.sass', '.scss', '.d.ts' ],
+        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules']
     },
     externals: {
         // require("jquery") is external and available
@@ -35,8 +37,4 @@ module.exports = {
         "jquery": "jQuery",
     },
     mode: 'production',
-    watchOptions: {
-        poll: true,
-        ignored: "/node_modules/"
-    }
 };

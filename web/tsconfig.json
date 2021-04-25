@@ -14,5 +14,9 @@
     //Since the inputs are handles via Webpack
     "include": [
         "src/ts/index.ts",
+    ],
+    "exclude": [
+        "./dist/**/*",
+        "./node_modules"
     ]
 }

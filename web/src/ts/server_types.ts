@@ -28,3 +28,25 @@ export interface ILogEntry {
 export enum LogAttribute {
     LogNoIndex
 }
+
+export interface IMetricResponse {
+    status:         number;
+    metrics:        IMetricEntry[];
+}
+
+export interface IMetricEntry {
+    epoch:          number;
+    cpu:            ICpuMetric;
+    mem:            IMemMetric;
+    player:         number
+}
+
+export interface ICpuMetric {
+    load_avg:       number;
+}
+
+export interface IMemMetric {
+    max_mem:        number;
+    total_mem:      number;
+    free_mem:       number;
+}
