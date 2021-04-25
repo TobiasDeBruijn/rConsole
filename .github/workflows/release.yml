@@ -62,7 +62,7 @@ jobs:
     - name: Make OSX NDK Directory
       run: sudo mkdir -p /usr/local/osx-ndk-x86
     - name: Copy OSX NDK
-      run: sudo cp -r target/* /usr/local/osx-ndk-x86
+      run: cp -r /tmp/osxcross/target/* /usr/local/osx-ndk-x86
 
     #Build
     - name: Build
