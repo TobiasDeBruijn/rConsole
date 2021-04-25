@@ -1,0 +1,281 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/TheDutchMC/rConsole/1.0.0
+info:
+  description: rConsole HTTP API
+  version: "0.3.0"
+  title: rConsole HTTP API
+  contact:
+    email: github@thedutchmc.nl
+  license:
+    name: GPLv3
+    url: 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - status
+                properties:
+                  session_id:
+                    type: string
+                    example: 4uLiZdT2X9dtgg7FCzQhrhseU6isFE
+                    description: 'The generated session ID for the user. This field can be null'
+                  status:
+                    $ref: '#/components/schemas/status'
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'An error occurred while processing the request'
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+              - username_base64
+              - password_base64
+              properties:
+                username_base64:
+                  type: string
+                  format: string
+                  description: The username of the user encoded in base64
+                password_base64:
+                  type: string
+                  format: string
+                  description: The password of  the user encoded in base64
+  /console/all:
+    post:
+      summary: Get all available console logs
+      responses:
+        '200':
+          description: Request successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    $ref: '#/components/schemas/status'
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/combinedLogEntry'
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'An error occurred while processing the request'
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+                - session_id
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/session_id'
+  /console/new:
+    post:
+      summary: Get all new console logs
+      responses:
+        '200':
+          description: Request successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    $ref: '#/components/schemas/status'
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/combinedLogEntry'
+                      
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'An error occurred while processing the request'
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+                - session_id
+                - since
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/session_id'
+                since:
+                  type: string
+                  description: The unix timestamp since the last received console log entry
+  /console/command:
+    post:
+      summary: Execute a console command
+      responses:
+        '200':
+          description: Request successful
+          content:
+            application/json:
+              schema:
+                required:
+                - status
+                properties:
+                  status:
+                    $ref: '#/components/schemas/status'
+        '400':
+          description: Bad request
+        '500':
+          description: An error occurred while processing the request
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+              - session_id,
+              - command
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/session_id'
+                command:
+                  type: string
+                  description: The command to execute. Must be without a '/'
+                  example: help
+  /stats/metrics:
+    post:
+      summary: Get server metrics
+      responses:
+        '200':
+          description: Request successful
+          content:
+            application/json:
+              schema:
+                required:
+                  - status
+                properties:
+                  status:
+                    $ref: '#/components/schemas/status'
+                  metrics:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - epoch
+                      - cpu
+                      - mem
+                      - player
+                      properties:
+                        epoch:
+                          type: integer
+                          format: int64
+                          description: The unix timestamp at which the metrics were recorded
+                        cpu:
+                          type: object
+                          required:
+                          - load_avg
+                          properties:
+                            load_avg:
+                              type: number
+                              format: float
+                              description: The average CPU load between 0 and 1 for Windows, and 0-corecount on linux
+                              example: 0.5
+                        mem:
+                          required:
+                          - max_mem
+                          - total_mem
+                          - free_mem
+                          properties:
+                            max_mem:
+                              type: number
+                              format: float
+                              description: The sum of used memory, free memory and unalocated memory. Equivalent to runtime.maxMemory() in the JVM
+                            total_mem:
+                              type: number
+                              format: float
+                              description: The sum of used memory and free memory. Equivalent to runtime.totalMemory() in the JVM
+                            free_mem:
+                              type: number
+                              format: float
+                              description: Memory free for new objects. Equivalent to runtime.freeMemory() in the JVM
+                        player:
+                          type: integer
+                          format: int64
+                          description: The amount of players online on the Minecraft server
+        '400':
+          description: Bad Request
+        '500':
+          description: An error occurred while processing the request
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+                - session_id
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/session_id'
+
+components:
+  schemas:
+    status:
+      type: integer
+      format: int32
+      example: 200
+      description: 'The status code returned by the server. This conforms to HTTP response codes'
+    session_id:
+      type: string
+      description: The user's session ID
+    combinedLogEntry:
+      type: object
+      required:
+      - id
+      - log_entry
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: 'The ID of the LogEntry'
+        log_entry:
+          type: object
+          required:
+          - message
+          - timestamp
+          - level
+          - thread
+          - log_attributes
+          properties:
+            message:
+              type: string
+              description: The log message
+            timestamp:
+              type: integer
+              format: int64
+              description: Unix timestamp for when the log event occurred
+            level:
+              type: string
+              enum:
+              - INFO
+              - WARN
+              description: The log level at which the log event occurred
+            thread:
+              type: string
+              description: The thread on which the log event occurred
+            log_attributes:
+              type: array
+              items:
+                type: string
+                example: LogNoEntry
+                description: Items with this attribute aren't indexed, and do not have an ID associated with them
+                enum:
+                - LogNoEntry

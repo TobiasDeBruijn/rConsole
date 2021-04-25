@@ -6,7 +6,6 @@
     "@types/jquery": "^3.5.5",
     "ansi_up": "^5.0.1",
     "awesome-typescript-loader": "^5.2.1",
-    "chart.js": "^3.2.0",
     "css-loader": "^5.2.4",
     "sass": "^1.32.11",
     "sass-loader": "^11.0.1",
