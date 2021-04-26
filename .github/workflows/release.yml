@@ -28,7 +28,7 @@ jobs:
     - name: Rename library
       run: sudo mv librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
     - name: Permissions
-      run: chmod a+rwx librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
+      run: sudo chmod a+rwx librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
 
     #Upload file
     - name: 'Upload Artifact'
