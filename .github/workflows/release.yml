@@ -48,7 +48,7 @@ jobs:
 
     #Build MacOS Dynamic library
     - name: Build MacOS library
-      run: docker run -it -v "${pwd}:/app/" registry.thedutchmc.nl/librconsole-macos-builder:latest
+      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
 
     #Build
     - name: Build
