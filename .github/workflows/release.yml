@@ -131,7 +131,7 @@ jobs:
     - name: Download Mac artifacts
       uses: actions/download-artifact@v2
       with:
-        name: liblibrconsole.dylib
+        name: librconsole.dylib
         path: librconsole/target/x86_64-apple-darwin/release/
 
     - name: Download Windows artifacts
