@@ -25,12 +25,15 @@ jobs:
     - name: Build MacOS library
       run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
 
+    - name: Rename library
+      run: mv librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
+
     #Upload file
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v2
       with:
-        name: librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib
-        path: librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib
+        name: maclib
+        path: librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
         retention-days: 1
 
   build-windows:
@@ -56,7 +59,7 @@ jobs:
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v2
       with:
-        name: librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
+        name: winlib
         path: librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
         retention-days: 1
 
@@ -85,7 +88,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+        name: linuxlib
         path: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
         retention-days: 1
 
@@ -100,7 +103,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: web-dist
+        name: webdist
         path: web/dist.zip
         retention-days: 1
 
@@ -123,8 +126,29 @@ jobs:
       run: chmod +x gradlew
 
     #Download artifacts
-    - name: Download all artifacts
+    - name: Download Mac artifacts
       uses: actions/download-artifact@v2
+      with:
+        name: winlib
+        path: librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib
+
+    - name: Download Windows artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: maclib
+        path: librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
+
+    - name: Download Linux artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: linuxlib
+        path: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+
+    - name: Download Linux artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: webdist
+        path: web/dist.zip
 
     #Build jarfile
     - name: Build JAR
@@ -134,7 +158,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: actions/output.jar
+        name: outputjar
         path: actions/output.jar
         retention-days: 1
 
@@ -158,7 +182,7 @@ jobs:
     - name: Download JAR Artifact
       uses: actions/download-artifact@v2
       with:
-        name: actions/output.jar
+        name: outputjar
         path: actions/output.jar
 
     #Create a release
