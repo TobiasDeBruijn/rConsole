@@ -26,7 +26,9 @@ jobs:
       run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
 
     - name: Rename library
-      run: mv librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
+      run: sudo mv librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
+    - name: Permissions
+      run: chmod a+rwx librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
 
     #Upload file
     - name: 'Upload Artifact'
