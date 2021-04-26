@@ -28,7 +28,7 @@ jobs:
     - name: Install Cargo and Rustup
       run: sudo curl https://sh.rustup.rs -sSf | sudo sh -s -- -y
     - name: Symlink Cargo 
-      run: ln -s ${HOME}/.cargo/bin/* /usr/local/bin/
+      run: sudo ln -s ${HOME}/.cargo/bin/* /usr/local/bin/
     - name: Install Rustup x86_64 Windows toolchain
       run: rustup toolchain install stable-x86_64-pc-windows-gnu
     - name: Install Rustup x86_64 Linux toolchain
