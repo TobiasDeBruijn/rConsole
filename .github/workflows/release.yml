@@ -36,6 +36,10 @@ jobs:
     - name: Build MacOS library
       run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
 
+    #Build Windows DLL
+    - name: Build Windows library
+      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-windows-builder:latest
+
     # Install dependencies needed to compile Rust
     - name: Install extra dependencies
       run: sudo apt-get update -y && sudo apt-get install make gcc gcc-mingw-w64
@@ -43,19 +47,17 @@ jobs:
       run: sudo curl https://sh.rustup.rs -sSf | sudo sh -s -- -y
     - name: Symlink Cargo 
       run: sudo ln -s ${HOME}/.cargo/bin/* /usr/local/bin/
-    - name: Install Rustup x86_64 Windows toolchain
-      run: rustup toolchain install stable-x86_64-pc-windows-gnu
     - name: Install Rustup x86_64 Linux toolchain
       run: rustup toolchain install stable-x86_64-unknown-linux-gnu
-    - name: Install Rustup x86_64 Windows target
-      run: rustup target install x86_64-pc-windows-gnu
     - name: Install Rustup x86_64 Linux target
       run: rustup target install x86_64-unknown-linux-gnu
 
     #Build
-    - name: Build
-      run: sudo make ghactions 
-    
+    - name: Build Linux library librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+      run: sudo make 
+    - name: Build final JAR
+      run: make ghactions
+
     - name: Fix Permissions
       run: chmod -R a+rwx *
 
