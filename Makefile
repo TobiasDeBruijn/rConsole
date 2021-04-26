@@ -30,7 +30,7 @@ releasejar: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so l
 	rm -rf ./build/resources
 	./gradlew releasejar
 
-ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
+ghactions: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll web/dist.zip
 	chmod +x gradlew
 	rm -rf ./build/resources
 	./gradlew ghActions

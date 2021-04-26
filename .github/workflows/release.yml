@@ -1,7 +1,7 @@
 # This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name: Release CI
+name: ReleaseCI
 
 on:
   push:
@@ -36,33 +36,19 @@ jobs:
     - name: Install Rustup x86_64 Linux target
       run: rustup target install x86_64-unknown-linux-gnu
 
-    #MacOS
-    - name: APT dependencies for MacOS
-      run: sudo apt install clang g++ zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
-    - name: Install Rustup x86_64 MacOS target
-      run: rustup target add x86_64-apple-darwin
-    - uses: DamianReeves/write-file-action@v1.0
-      with:
-        path: ~/.cargo/config
-        contents: |
-          [target.x86_64-apple-darwin]
-          linker = "x86_64-apple-darwin14-clang"
-          ar = "x86_64-apple-darwin14-ar"
-        write-mode: append
-    - name: Clone OSXCross
-      run: git clone https://github.com/tpoechtrager/osxcross /tmp/osxcross/
-    - name: Download MacOS SDK
-      run: wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz -O /tmp/osxcross/MacOSX10.11.sdk.tar.xz
-    - name: Move MacOS SDK to Tarballs
-      run: mv /tmp/osxcross/MacOSX10.11.sdk.tar.xz /tmp/osxcross/tarballs/
-    - name: Sed in build.sh
-      run: cd /tmp/osxcross && sed -i -e 's|-march=native||g' build_clang.sh build.sh
-    - name: Build OSXCross
-      run: cd /tmp/osxcross && UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
-    - name: Make OSX NDK Directory
-      run: sudo sudo mkdir -p /usr/local/osx-ndk-x86
-    - name: Copy OSX NDK
-      run: sudo cp -r /tmp/osxcross/target/* /usr/local/osx-ndk-x86
+    #Docker
+    - name: Install dependencies for Docker
+      run: sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+    - name: Docker GPG Key
+      run: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    - name: Docker APT repository
+      run: echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - name: Install Docker
+      run: sudo apt-get update -y && sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+    #Build MacOS Dynamic library
+    - name: Build MacOS library
+      run: docker run -it -v "${pwd}:/app/" registry.thedutchmc.nl/librconsole-macos-builder:latest
 
     #Build
     - name: Build
