@@ -4,7 +4,7 @@ servers:
     url: https://virtserver.swaggerhub.com/TheDutchMC/rConsole/1.0.0
 info:
   description: rConsole HTTP API
-  version: "0.4.0"
+  version: "0.5.0"
   title: rConsole HTTP API
   contact:
     email: github@thedutchmc.nl
@@ -51,6 +51,34 @@ paths:
                   type: string
                   format: string
                   description: The password of  the user encoded in base64
+  /auth/session:
+    post:
+      summary: Check if a session ID is valid
+      responses:
+        '200':
+          description: Request successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    $ref: '#/components/schemas/status'
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'An error occurred while processing the request'
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+                - session_id
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/session_id'
   /console/all:
     post:
       summary: Get all available console logs
@@ -152,6 +180,42 @@ paths:
                   type: string
                   description: The command to execute. Must be without a '/'
                   example: help
+  /stats/os:
+    post:
+      summary: Get the Operating System on which the server runs
+      responses:
+        '200':
+          description: Request successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    $ref: '#/components/schemas/status'
+                  os:
+                    type: string
+                    enum:
+                    - Windows
+                    - Linux
+                    - MacOS
+                    - BSD
+                    - Unkown
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'An error occurred while processing the request'
+      requestBody:
+        content:
+          x-www-form-urlencoded:
+            schema:
+              required:
+                - session_id
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/session_id'       
   /stats/metrics:
     post:
       summary: Get server metrics
