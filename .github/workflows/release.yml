@@ -34,7 +34,7 @@ jobs:
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v2
       with:
-        name: maclib
+        name: librconsole.dylib
         path: librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
         retention-days: 1
 
@@ -61,7 +61,7 @@ jobs:
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v2
       with:
-        name: winlib
+        name: librconsole.dll
         path: librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
         retention-days: 1
 
@@ -90,7 +90,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: linuxlib
+        name: librconsole.so
         path: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
         retention-days: 1
 
@@ -105,7 +105,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: webdist
+        name: dist.zip
         path: web/dist.zip
         retention-days: 1
 
@@ -131,36 +131,35 @@ jobs:
     - name: Download Mac artifacts
       uses: actions/download-artifact@v2
       with:
-        name: winlib
-        path: librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib
+        name: liblibrconsole.dylib
+        path: librconsole/target/x86_64-apple-darwin/release/
 
     - name: Download Windows artifacts
       uses: actions/download-artifact@v2
       with:
-        name: maclib
-        path: librconsole/target/x86_64-pc-windows-gnu/release/librconsole.dll
+        name: librconsole.dll
+        path: librconsole/target/x86_64-pc-windows-gnu/release/
 
     - name: Download Linux artifacts
       uses: actions/download-artifact@v2
       with:
-        name: linuxlib
-        path: librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+        name: librconsole.so
+        path: librconsole/target/x86_64-unknown-linux-gnu/release/
 
     - name: Download Linux artifacts
       uses: actions/download-artifact@v2
       with:
-        name: webdist
-        path: web/dist.zip
+        name: dist.zip
+        path: web/
 
-    #Build jarfile
     - name: Build JAR
-      run: make ghactions
+      run: ./gradlew ghactions
     
     #Upload file
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: outputjar
+        name: output.jar
         path: actions/output.jar
         retention-days: 1
 
@@ -184,8 +183,8 @@ jobs:
     - name: Download JAR Artifact
       uses: actions/download-artifact@v2
       with:
-        name: outputjar
-        path: actions/output.jar
+        name: output.jar
+        path: actions/
 
     #Create a release
     - name: Create Release
