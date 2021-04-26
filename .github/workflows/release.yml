@@ -22,6 +22,20 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    #Docker
+    - name: Install dependencies for Docker
+      run: sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+    - name: Docker GPG Key
+      run: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    - name: Docker APT repository
+      run: echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - name: Install Docker
+      run: sudo apt-get update -y && sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+    #Build MacOS Dynamic library
+    - name: Build MacOS library
+      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
+
     # Install dependencies needed to compile Rust
     - name: Install extra dependencies
       run: sudo apt-get update -y && sudo apt-get install make gcc gcc-mingw-w64
@@ -37,20 +51,6 @@ jobs:
       run: rustup target install x86_64-pc-windows-gnu
     - name: Install Rustup x86_64 Linux target
       run: rustup target install x86_64-unknown-linux-gnu
-
-    #Docker
-    - name: Install dependencies for Docker
-      run: sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-    - name: Docker GPG Key
-      run: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    - name: Docker APT repository
-      run: echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    - name: Install Docker
-      run: sudo apt-get update -y && sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
-    #Build MacOS Dynamic library
-    - name: Build MacOS library
-      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
 
     #Build
     - name: Build
