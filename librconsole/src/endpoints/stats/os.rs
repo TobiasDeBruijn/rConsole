@@ -27,6 +27,7 @@ pub async fn post_get_os(data: web::Data<AppData>, form: web::Form<OsRequest>) -
     //We need to allow this because we must assign a value to the String
     //It might be overwritten, but it might not be.
     #[allow(unused_assignments)]
+    #[allow(unused_mut)]
     let mut os: &str = "";
 
     #[cfg(windows)]

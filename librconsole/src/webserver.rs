@@ -35,6 +35,7 @@ pub async fn start(config: Config, db_path: String, static_files_path: String, j
             .service(crate::endpoints::auth::session::post_check_session)
             .service(crate::endpoints::stats::metrics::get_metrics)
             .service(crate::endpoints::stats::os::post_get_os)
+            .service(crate::endpoints::files::all_files::post_files_all)
             .service(Files::new("/", &static_files_path)
                 .prefer_utf8(true)
                 .index_file("index.html")

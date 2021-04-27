@@ -6,7 +6,7 @@ use std::io::Write;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
     pub port:   u32,
-    pub pepper: String,
+    pub pepper: String
 }
 
 impl Config {

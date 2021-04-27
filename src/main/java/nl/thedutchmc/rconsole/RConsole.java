@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.gson.Gson;
@@ -20,6 +19,7 @@ import nl.thedutchmc.rconsole.features.readconsole.ReadConsole;
 import nl.thedutchmc.rconsole.gson.out.ServerShutdownPacket;
 import nl.thedutchmc.rconsole.tcp.TcpClient;
 import nl.thedutchmc.rconsole.tcp.TcpServer;
+import nl.thedutchmc.rconsole.update.UpdateChecker;
 import nl.thedutchmc.rconsole.webserver.WebServer;
 
 public class RConsole extends JavaPlugin {
@@ -38,6 +38,8 @@ public class RConsole extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		RConsole.INSTANCE = this;
+		
+		new UpdateChecker(this).checkUpdate();
 		
 		this.config = new Configuration(this);
 		RConsole.DEBUG = this.config.getConfig().isDebugMode();
@@ -111,5 +113,9 @@ public class RConsole extends JavaPlugin {
 	
 	public static boolean getIsRunning() {
 		return RConsole.IS_RUNNING;
+	}
+	
+	public static boolean getIsDebug() {
+		return RConsole.DEBUG;
 	}
 }

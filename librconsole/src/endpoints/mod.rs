@@ -9,6 +9,7 @@ use std::path::PathBuf;
 pub mod console;
 pub mod auth;
 pub mod stats;
+pub mod files;
 
 pub fn check_session_id(data: &AppData, session_id: &str) -> io::Result<bool> {
     let db = Database::new(PathBuf::from(data.db_path.clone())).unwrap();
