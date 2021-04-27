@@ -18,11 +18,10 @@ Because I use Rust code, this plugin will not work on all operating systems and 
 At the moment the following is supported:
 - x86_64 Linux
 - x86_64 Windows
+- x86_64 MacOS
 
 I am working on support for aarch64 (ARM 64-bit, Raspberry Pi 4 and up) and armhf (ARM 32, Raspberry Pi 3 and lower) support, though this takes some work.
-
-MacOS will likely never be supported. I don't think it is possible to easily cross-compile from Linux to MacOS.  
-If you know how to achieve this with the default Rust toolchains, please open an [issue](https://github.com/TheDutchMC/rConsole/issues/new)
+Apple's M1 chips aren't supported and probably won't be for a long while.
 
 ## On the agenda
 - File browser
@@ -99,6 +98,7 @@ ar = "x86_64-apple-darwin14-ar"
 8. `UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh`
 9. `sudo mkdir -p /usr/local/osx-ndk-x86`
 10. `sudo cp -r target/* /usr/local/osx-ndk-x86` 
+11. Lastly, add /usr/local/osx-ndk-x86 to your PATH: `export PATH=${PATH}:/usr/local/osx-ndk-x86/bin/`
 
 The Makefile will take care of the rest, assuming you've followed the instructions above.
 
