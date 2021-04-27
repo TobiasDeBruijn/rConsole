@@ -7,6 +7,10 @@ export async function loadFiles() {
     await setup();
     let path = findGetParameter('path');
 
+    if(path != null) {
+        document.getElementById('path').innerHTML = "/" + atob(path) + "/";
+    }
+
     let filesRequest = $.ajax({
         url: ALL_FILES_ENDPOINT,
         method: 'POST',
@@ -36,7 +40,8 @@ export async function loadFiles() {
                 addFolderIcon(fsEntryDiv);
                 fsEntryDiv.addEventListener('click', (_e) => {
                     let url = new URL(window.location.href);
-                    let pathNew = (path != null) ? atob(path) + "/" + fsEntry.name : fsEntry.name; 
+                    let pathNew = (path != null) ? atob(path) + "/" + fsEntry.name : fsEntry.name;
+                
                     url.searchParams.set('path', btoa(pathNew));
                     window.location.href = url.toString(); 
                 });
@@ -58,11 +63,17 @@ export async function loadFiles() {
 }
 
 function addFolderIcon(elem: HTMLElement) {
-
+    let imgElem = document.createElement('img');
+    imgElem.src = "../img/folder_icon.png";
+    imgElem.alt = "";
+    elem.appendChild(imgElem);
 }
 
 function addFileIcon(elem: HTMLElement) {
-
+    let imgElem = document.createElement('img');
+    imgElem.src = "../img/file_icon.png";
+    imgElem.alt = "";
+    elem.appendChild(imgElem);
 }
 
 function addUnsupportedIcon(elem: HTMLElement) {
