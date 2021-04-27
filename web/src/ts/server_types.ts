@@ -66,3 +66,8 @@ export enum FileSystemEntryType {
     File,
     Unsupported
 }
+
+export interface IFileContentResponse {
+    status:         number;
+    content:        string;
+}

@@ -22,6 +22,8 @@ export async function loadConfig() {
     METRIC_ENDPOINT =           config.uri + "/stats/metrics";
 
     ALL_FILES_ENDPOINT =        config.uri + "/files/all";
+    FILE_CONTENT_ENDPOINT =     config.uri + "/files/file";
+    FILE_SAVE_ENDPOINT =        config.uri + "/files/save";
 }
 
 export let LOGIN_ENDPOINT:              string;
@@ -34,3 +36,5 @@ export let CONSOLE_COMMAND_ENDPOINT:    string;
 export let METRIC_ENDPOINT:             string;
 
 export let ALL_FILES_ENDPOINT:          string;
+export let FILE_CONTENT_ENDPOINT:       string;
+export let FILE_SAVE_ENDPOINT:          string;

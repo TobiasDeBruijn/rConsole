@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <meta name="theme-color" content="#1D66B5">
+        <meta name="author" content="Tobias de Bruijn &ltgithub@thedutchmc.nl&gt">
+        <meta name="description" content="rConsole Web Interface for Minecraft Spigot servers.">
+        <meta name="keywords" content="rConsole, interface, managment, spigot, minecraft">
+
+        <title>rConsole Dashboard</title>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js" integrity="sha512-VMsZqo0ar06BMtg0tPsdgRADvl0kDHpTbugCBBrL55KmucH6hP9zWdLIWY//OTfMnzz6xWQRxQqsUFefwHuHyg==" crossorigin="anonymous"></script>
+        <script src="/dist/ansi_up.js"></script>
+        <script src="/dist/dist.js"></script>
+    </head>
+    <body>
+        <noscript>
+            <p> You need JavaScript enabled to use this page. </p>
+        </noscript>
+
+        <nav style="visibility: hidden;">
+            <div class="nav-root">
+                <div class="upper-nav">
+                    <div class="left-aligned">
+                        <img src="../img/logo.png" alt="logo">
+                        <p>rConsole</p>
+                    </div>
+                    <div class="right-aligned">
+                        <p class="clickable" id="githubBtn">GitHub</p>
+                        <p class="clickable" id="logoutBtn">Logout</p>
+                    </div>
+                </div>
+                <div class="lower-nav">
+                    <div class="left-aligned">
+                        <p class="clickable" id="consoleBtn">Console</p>
+                        <p class="clickable" id="filesBtn"> Files</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main style="visibility: hidden;" class="file-editor-section">
+            <div class="file-editor-holder">
+                <div class="file-editor-header">
+                    <h2> File Editor (Warn: WIP) </h2>
+                    <p id="path">/</p>
+                </div>
+                <div class="file-editor-view" contenteditable="true">
+                    <pre id="file-editor-view">
+
+                    </pre>
+                </div>
+                <div class="file-editor-controls">
+                    <button class="save" id="saveBtn">Save</button>
+                    <button class="cancel" id="cancenBtn">Cancel</button>
+                </div>
+                <div class="spacer"></div>
+            </div>
+        </main>
+        <script>
+            rConsole.setupDashboard();
+            rConsole.setupFileEditor();
+        </script>
+    </body>
+</html>

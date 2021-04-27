@@ -48,6 +48,10 @@ export async function loadFiles() {
             } else if(fsEntry.entry_type.toString() == 'File') {
                 fsEntryDiv.classList.add('fs-file');
                 addFileIcon(fsEntryDiv);
+                fsEntryDiv.addEventListener("click", (_e) => {
+                    let pathNew = (path != null) ? atob(path) + "/" + fsEntry.name : fsEntry.name;
+                    window.location.href = 'file-editor.html?file=' + btoa(pathNew);
+                });
             } else {
                 fsEntryDiv.classList.add('fs-unsupported');
                 addUnsupportedIcon(fsEntryDiv);

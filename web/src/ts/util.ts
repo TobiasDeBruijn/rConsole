@@ -41,3 +41,17 @@ export function findGetParameter(parameterName: string): string {
         });
     return result;
 }
+
+/**
+ * Escapes the provided string to make it safe for usage in a HTML document
+ * @param str The string to escape to make it safe for usage in a HTML document 
+ * @returns The escaped string
+ */
+export function htmlEscape(str: string): string {
+    return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+}

@@ -83,6 +83,10 @@ public class CommandLoader {
 			description = "";
 		}
 		
+		if(pluginManager.getPermission(name) != null) {
+			return;
+		}
+		
 		if(permissionDefault == null) {
 			permissionDefault = PermissionDefault.OP;
 		}
