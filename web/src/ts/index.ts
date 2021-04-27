@@ -2,7 +2,8 @@ import "../scss/index.scss";
 import { loadConfig } from "./config";
 
 export { setupLoginPage     } from "./login";
-export { setupDashboard     } from "./dashboard/dashboard";
+export { setupDashboard, loadControlButtons } from "./dashboard/dashboard";
+export { loadFiles } from "./dashboard/files"; 
 export { setupConsoleLoop   } from "./dashboard/console";
 export { setupCharts        } from "./dashboard/charts";
 

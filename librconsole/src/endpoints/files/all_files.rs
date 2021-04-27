@@ -54,13 +54,13 @@ pub async fn post_files_all(data: web::Data<AppData>, form: web::Form<AllFilesRe
         //It only needs to be mutable on Windows
         #[allow(unused_mut)]
         let mut path = form.folder.clone().unwrap();
-        
+
         //We definitely don't want people trying to access directories outside the server directory
         if path.contains("..") {
             return HttpResponse::Ok().json(AllFilesResponse { status: 403, files: None });
         }
 
-        //Dont want people accessing the server's root
+        //Don't want people accessing the server's root
         if path.starts_with("/") {
             return HttpResponse::Ok().json(AllFilesResponse { status: 403, files: None });
         }

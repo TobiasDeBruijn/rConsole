@@ -21,7 +21,7 @@ export async function isLoggedIn(): Promise<boolean> {
     });
 
     let isLoggedInResponse = await isLoggedInReq;
-    let response = <ISessionResponse> JSON.parse(isLoggedInResponse);
+    let response = <ISessionResponse> isLoggedInResponse;
 
     return response.status == 200;
 }

@@ -50,3 +50,19 @@ export interface IMemMetric {
     total_mem:      number;
     free_mem:       number;
 }
+
+export interface IAllFilesResponse {
+    status:         number;
+    files:          IFileSystemEntry[]
+}
+
+export interface IFileSystemEntry {
+    entry_type:     FileSystemEntryType;
+    name:           string;
+}
+
+export enum FileSystemEntryType {
+    Folder,
+    File,
+    Unsupported
+}

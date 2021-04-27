@@ -5,7 +5,7 @@ import { getCookie } from "../util";
 
 export async function setupDashboard() {
     await setup();
-    loadButtons();
+    loadNavButtons();
 
     //Check authentication
     if(!await isLoggedIn()) {
@@ -14,11 +14,15 @@ export async function setupDashboard() {
     }
 }
 
-export function loadButtons() {
+function loadNavButtons() {
     //navigatrion
-    document.getElementById("githubBtn").addEventListener("click", (_e) => { /*window.location.href = "https://github.com/TheDutchMC/rConsole"*/ window.open("https://github.com/TheDutchMC/rConsole", "_blank"); });
+    document.getElementById("githubBtn").addEventListener("click", (_e) => { window.open("https://github.com/TheDutchMC/rConsole", "_blank"); });
     document.getElementById("logoutBtn").addEventListener("click", (_e) => { doLogout() });
+    document.getElementById("consoleBtn").addEventListener("click", (_e) => window.location.href = "index.html");
+    document.getElementById("filesBtn").addEventListener("click", (_e) => window.location.href = "files.html");
+}
 
+export function loadControlButtons() {
     //Server control
     document.getElementById('stop-server-btn').addEventListener("click", (_e) => {
         $.ajax({

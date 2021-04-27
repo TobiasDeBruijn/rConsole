@@ -42,48 +42,16 @@
             </div>
         </nav>
 
-        <main style="visibility: hidden;" class="dashboard">
-            <div class="top">
-                <div class="server-control-root">
-                    <p class="server-name" id="server-name">Minecraft</p>
-                    <div class="server-stats-holder">
-                        <div class="server-stat" id="memory-stat">//TODO: server stats</div>
-                    </div>
-                    <div class="server-control-btns">
-                        <button class="stop-server-btn" id="stop-server-btn">Stop</button>
-                    </div>
-                </div>
-                <div class="console-root">
-                    <div id="console-view" class="console-view"></div>
+        <main style="visibility: hidden;" class="files dashboard">
+            <div class="top file-browser-holder">
+                <div id="file-browser" class="file-browser">
 
-                    <div class="input-view">
-                        <p>&gt;</p>
-                        <input type="text" id="console-input" aria-label="Console Command Input">
-                    </div>
-                </div>
-            </div>
-            <div class="bottom">
-                <div class="graph-holder">
-                    <div>
-                        <h2>CPU Usage</h2>
-                        <div>
-                            <canvas id="cpu-graph"></canvas>
-                        </div>
-                    </div>
-                    <div>
-                        <h2>Memory Usage</h2>
-                        <div>
-                            <canvas id="mem-graph"></canvas>
-                        </div>
-                    </div>
                 </div>
             </div>
         </main>
         <script>
             rConsole.setupDashboard();
-            rConsole.setupConsoleLoop();
-            rConsole.setupCharts();
-            rConsole.loadControlButtons();
+            rConsole.loadFiles();
         </script>
     </body>
 </html>
