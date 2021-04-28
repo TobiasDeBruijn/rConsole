@@ -26,6 +26,11 @@ sha2 = "0.9.3"
 base64 = "0.13.0"
 chrono = "0.4.19"
 
+# I dont directly depend on typenum, but actix does
+# And we need the no_std version, because of Ubuntu Xenial.
+# https://github.com/paholg/typenum/issues/172
+typenum = { version = "1.13.0", features = ["no_std"]}
+
 [target.'cfg(unix)'.dependencies]
 libc = "0.2.93"
 

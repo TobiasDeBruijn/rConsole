@@ -70,21 +70,40 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    #Docker
+    - name: Install dependencies for Docker
+      run: sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+    - name: Docker GPG Key
+      run: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    - name: Docker APT repository
+      run: echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - name: Install Docker
+      run: sudo apt-get update -y && sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+    #Build Linux dynamic library
+    - name: Build Windows library
+      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-xenial-builder:latest
+
+    - name: Rename library
+      run: sudo mv librconsole/target/x86_64-unknown-linux-gnu/release/liblibrconsole.so librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+    - name: Permissions
+      run: sudo chmod a+rwx librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+
     # Install dependencies needed to compile Rust
-    - name: Install extra dependencies
-      run: sudo apt-get update -y && sudo apt-get install make gcc gcc-mingw-w64
-    - name: Install Cargo and Rustup
-      run: sudo curl https://sh.rustup.rs -sSf | sudo sh -s -- -y
-    - name: Symlink Cargo 
-      run: sudo ln -s ${HOME}/.cargo/bin/* /usr/local/bin/
-    - name: Install Rustup x86_64 Linux toolchain
-      run: rustup toolchain install stable-x86_64-unknown-linux-gnu
-    - name: Install Rustup x86_64 Linux target
-      run: rustup target install x86_64-unknown-linux-gnu
+    #- name: Install extra dependencies
+    #  run: sudo apt-get update -y && sudo apt-get install make gcc gcc-mingw-w64
+    #- name: Install Cargo and Rustup
+    #  run: sudo curl https://sh.rustup.rs -sSf | sudo sh -s -- -y
+    #- name: Symlink Cargo 
+    #  run: sudo ln -s ${HOME}/.cargo/bin/* /usr/local/bin/
+    #- name: Install Rustup x86_64 Linux toolchain
+    #  run: rustup toolchain install stable-x86_64-unknown-linux-gnu
+    #- name: Install Rustup x86_64 Linux target
+    #  run: rustup target install x86_64-unknown-linux-gnu
 
     #Build
-    - name: Build Linux library librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
-      run: make librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+    #- name: Build Linux library librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
+    #  run: make librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
 
     #Upload file
     - name: Upload Artifact
