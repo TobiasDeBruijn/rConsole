@@ -41,7 +41,7 @@ pub async fn post_logs_new(data: web::Data<crate::webserver::AppData>, form: web
 
     let since_wrapped = form.since.parse::<u32>();
     if since_wrapped.is_err() {
-        return HttpResponse::BadRequest().body(since_wrapped.unwrap().to_string());
+        return HttpResponse::BadRequest().body(since_wrapped.err().unwrap().to_string());
     }
     let since = since_wrapped.unwrap();
 

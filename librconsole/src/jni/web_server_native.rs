@@ -15,12 +15,12 @@ use crate::jni::util::{bool_to_Boolean, convert_jvalue_to_jobject, create_string
 use crate::jni::{jvm_command_exec, JvmCommand};
 
 /**
- * Class:     nl.thedutchmc.rconsole.webserver.Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    startWebServer(String configFolder) -> void
  * Signature: (Ljava/lang/String;)V
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServer(env: JNIEnv, _class: JClass, config_file_path_jstring: JString, database_file_path_jstring: JString, static_files_path_jstring: JString) {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_startWebServer(env: JNIEnv, _class: JClass, config_file_path_jstring: JString, database_file_path_jstring: JString, static_files_path_jstring: JString) {
     log_info(&env, "Loading library librconsole");
 
     let config_file_path: String = env.get_string(config_file_path_jstring).expect("Unable to get String from JString 'config_folder_jstring'").into();
@@ -97,12 +97,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_startWebServ
 }
 
 /**
- * Class:     nl.thedutchmc.rconsole.webserver.Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    appendConsoleLog(String log, long timestamp, String level, String thread) -> void
  * Signature: (Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_appendConsoleLog(env: JNIEnv, _class: JClass, log_message_jstring: JString, log_timestamp_jlong: jlong, log_level_jstring: JString, log_thread_jstring: JString) {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_appendConsoleLog(env: JNIEnv, _class: JClass, log_message_jstring: JString, log_timestamp_jlong: jlong, log_level_jstring: JString, log_thread_jstring: JString) {
     let log_message: String = env.get_string(log_message_jstring).expect("Unable to get String from JString 'log_jstring'").into();
     let log_timestamp: i64 = log_timestamp_jlong;
     let log_level: String = env.get_string(log_level_jstring).expect("Unable to get String from JString 'log_level_jstring").into();
@@ -121,12 +121,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_appendConsol
 }
 
 /**
- * Class:     nl.thedutchmc.rconsole.webserver.Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    addUser(String username, String password) -> void
  * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_addUser(env: JNIEnv, _class: JClass, username_jstring: JString, password_jstring: JString) {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_addUser(env: JNIEnv, _class: JClass, username_jstring: JString, password_jstring: JString) {
     let username: String = env.get_string(username_jstring).expect("Unable to get String from JString 'username_jstring'").into();
     let password: String = env.get_string(password_jstring).expect("Unable to get String from JString 'password_jstring'").into();
 
@@ -179,12 +179,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_addUser(env:
 }
 
 /**
- * Class:     nl.thedutchmc.rconsole.webserver.Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    delUser(String username) -> boolean
  * Signature: (Ljava/lang/String;)Z
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delUser(env: JNIEnv, _class: JClass, username_jstring: JString) -> jobject {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_delUser(env: JNIEnv, _class: JClass, username_jstring: JString) -> jobject {
     let username: String = env.get_string(username_jstring).expect("Unable to get String from JString 'username_jstring'").into();
 
     let database_lock = crate::DATABASE.lock().unwrap();
@@ -229,12 +229,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delUser(env:
 }
 
 /**
- * Class:     nl_thedutchmc_rconsole_webserver_Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    listUsers() -> String[]
  * Signature: ()[Ljava/lang/String;
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_listUsers(env: JNIEnv, _class: JClass) -> jobjectArray {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_listUsers(env: JNIEnv, _class: JClass) -> jobjectArray {
     let database_lock = crate::DATABASE.lock().unwrap();
     let database = database_lock.take().unwrap();
 
@@ -275,12 +275,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_listUsers(en
 }
 
 /**
- * Class:     nl_thedutchmc_rconsole_webserver_Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    getUserSessions() -> HashMap<String, String[]>
  * Signature: ()Ljava/util/HashMap;
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_getUserSessions(env: JNIEnv, _class: JClass) -> jobject {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_getUserSessions(env: JNIEnv, _class: JClass) -> jobject {
 
     let mut sessions_users_map: HashMap<String, Vec<String>> = HashMap::new();
     {
@@ -376,12 +376,12 @@ pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_getUserSessi
 }
 
 /**
- * Class:     nl_thedutchmc_rconsole_webserver_Native
+ * Class:     nl.thedutchmc.rconsole.core.webserver.Native
  * Method:    delSession(String sessionId) -> void
  * Signature: (Ljava/lang/String;)Ljava/lang/Boolean;
  */
 #[no_mangle]
-pub extern "system" fn Java_nl_thedutchmc_rconsole_webserver_Native_delSession(env: JNIEnv, _class: JClass, session_id_jstring: JString) -> jobject {
+pub extern "system" fn Java_nl_thedutchmc_rconsole_core_webserver_Native_delSession(env: JNIEnv, _class: JClass, session_id_jstring: JString) -> jobject {
     let session_id: String = env.get_string(session_id_jstring).expect("Unable to get String from JString 'session_id_jstring'").into();
 
     let database_lock = crate::DATABASE.lock().unwrap();

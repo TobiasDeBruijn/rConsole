@@ -36,7 +36,7 @@ pub fn log_info<'a>(env: &'a JNIEnv, log: &str) {
     Calls the method logInfo(Object log) in nl.thedutchmc.rconsole.RConsole
     */
     let log_str_formatted = format!("[librconsole] {}", log);
-    let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logInfo", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
+    let _ = env.call_static_method("nl/thedutchmc/rconsole/core/RConsole", "logInfo", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
 }
 
 /**
@@ -47,7 +47,7 @@ pub fn log_warn<'a>(env: &'a JNIEnv, log: &str) {
     Calls the method logWarn(Object log) in nl.thedutchmc.rconsole.RConsole
     */
     let log_str_formatted = format!("[librconsole] {}", log);
-    let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logWarn", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
+    let _ = env.call_static_method("nl/thedutchmc/rconsole/core/RConsole", "logWarn", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
 }
 
 /**
@@ -59,5 +59,5 @@ pub fn log_debug<'a>(env: &'a JNIEnv, log: &str) {
     This will only output to the console if IS_DEBUG is true (Java code)
     */
     let log_str_formatted = format!("[librconsole] {}", log);
-    let _ = env.call_static_method("nl/thedutchmc/rconsole/RConsole", "logDebug", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
+    let _ = env.call_static_method("nl/thedutchmc/rconsole/core/RConsole", "logDebug", "(Ljava/lang/Object;)V", &[str_to_jvalue(env, &log_str_formatted)]);
 }

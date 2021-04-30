@@ -1,0 +1,11 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    compileOnly 'org.yaml:snakeyaml:1.8'
+    compileOnly 'com.google.code.gson:gson:2.8.6'
+
+    compile 'net.lingala.zip4j:zip4j:2.7.0'
+    compile 'com.github.TheDutchMC:HttpLib:1.1'
+}

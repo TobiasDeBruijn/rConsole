@@ -40,7 +40,7 @@ pub async fn post_execute_command(data: web::Data<AppData>, form: web::Form<Exec
     }
 
     //Get the class 'nl.thedutchmc.rconsole.webserver.WebServer
-    let jvm_command_get_webserver_class = JvmCommand::get_class("nl/thedutchmc/rconsole/webserver/WebServer");
+    let jvm_command_get_webserver_class = JvmCommand::get_class("nl/thedutchmc/rconsole/core/webserver/WebServer");
     jvm_command_tx.send(jvm_command_get_webserver_class.0).expect("An issue occurred while sending a JvmCommand");
     let jvm_response = jvm_command_get_webserver_class.1.recv().expect("An issue occurred while reading the response of a JvmCommand execution");
 
