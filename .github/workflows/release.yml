@@ -23,7 +23,7 @@ jobs:
 
     #Build MacOS Dynamic library
     - name: Build MacOS library
-      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-macos-builder:latest
+      run: docker run -v $(pwd):/app/ docker-registry.k8s.array21.dev/librconsole-macos-builder:latest
 
     - name: Rename library
       run: sudo mv librconsole/target/x86_64-apple-darwin/release/liblibrconsole.dylib librconsole/target/x86_64-apple-darwin/release/librconsole.dylib
@@ -55,7 +55,7 @@ jobs:
 
     #Build Windows DLL
     - name: Build Windows library
-      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-windows-builder:latest
+      run: docker run -v $(pwd):/app/ docker-registry.k8s.array21.dev/librconsole-windows-builder:latest
 
     #Upload file
     - name: 'Upload Artifact'
@@ -82,7 +82,7 @@ jobs:
 
     #Build Linux dynamic library
     - name: Build Windows library
-      run: docker run -v $(pwd):/app/ registry.thedutchmc.nl/librconsole-xenial-builder:latest
+      run: docker run -v $(pwd):/app/ docker-registry.k8s.array21.dev/librconsole-xenial-builder:latest
 
     - name: Rename library
       run: sudo mv librconsole/target/x86_64-unknown-linux-gnu/release/liblibrconsole.so librconsole/target/x86_64-unknown-linux-gnu/release/librconsole.so
