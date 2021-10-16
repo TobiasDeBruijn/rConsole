@@ -2,3 +2,4 @@ target/
 .build/
 .tmpbuild/
 Cargo.lock
+.idea/

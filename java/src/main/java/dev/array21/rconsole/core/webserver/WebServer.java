@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import net.lingala.zip4j.ZipFile;
 import dev.array21.rconsole.core.RConsole;
 import dev.array21.rconsole.core.annotations.Nullable;
+import dev.array21.rconsole.core.util.Pair;
 import dev.array21.rconsole.core.util.Util;
 
 /**
@@ -43,63 +44,140 @@ public class WebServer {
 	}
 	
 	static {
-		saveNativeLib: {
-			String osString = System.getProperty("os.name").toLowerCase();
-			String nativeLibraryName;
+		saveLib: {
+			String libName;
 			
-			//Determine the OS, and from that get the path inside the jar file to librconsole
-			if(osString.contains("linux") ) {
-				nativeLibraryName = "/x86_64/linux/librconsole.so";
-			} else if(osString.contains("windows")) {
-				nativeLibraryName = "/x86_64/windows/librconsole.dll";
-			} else if(osString.contains("mac")) {
-				nativeLibraryName = "/x86_64/macos/librconsole.dylib";
-			} else {
-				RConsole.logWarn(String.format("You are running on an OS not supported by rConsole (%s). The built-in webserver will not work.", osString));
-				break saveNativeLib;
-			}
-		
-			URL libUrl = WebServer.class.getResource(nativeLibraryName);
-		
-			//Create a temporary directory in which we save librconsole
-			File tmpDir;
-			try {
-				tmpDir = Files.createTempDirectory("librconsole").toFile();
-			} catch(IOException e) {
-				RConsole.logWarn("An error occurred while creating a temporary directory for 'librconsole': " + e.getMessage());
-				RConsole.logDebug(Util.getStackTrace(e));
+			String osName = System.getProperty("os.name").toLowerCase();
+			if(osName.contains("linux")) {
+				switch(System.getProperty("os.arch")) {
+				case "amd64": libName = "/x86_64/linux/libskinfixer-focal.so"; break;
+				case "arm": libName = "/armhf/linux/libskinfixer.so"; break;
+				case "aarch64": libName = "/aarch64/linux/libskinfixer.so"; break;
+				default:
+					RConsole.logWarn(String.format("Your architecture is not supported. Please open a request here: https://github.com/TheDutchMC/rConsole/issues/new/choose. Your Arch is '%s' running on Linux, make sure you mention this in your request!", System.getProperty("os.arch")));
+					break saveLib;
+				}
 				
-				break saveNativeLib;
+			} else if(osName.contains("windows")) {
+				switch(System.getProperty("os.arch")) {
+				case "amd64": libName = "/x86_64/windows/libskinfixer.dll"; break;
+				default:
+					RConsole.logWarn(String.format("Your architecture is not supported. Please open a request here: https://github.com/TheDutchMC/rConsole/issues/new/choose. Your Arch is '%s' running on Windows, make sure you mention this in your request!", System.getProperty("os.arch")));
+					break saveLib;
+				}
+				
+			} else if(osName.contains("mac")) {
+				switch(System.getProperty("os.arch")) {
+				case "amd64": libName = "/x86_64/darwin/libskinfixer.dylib";; break;
+				default:
+					RConsole.logWarn(String.format("Your architecture is not supported. Please open a request here: https://github.com/TheDutchMC/rConsole/issues/new/choose. Your Arch is '%s' running on MacOS (Apple Darwin), make sure you mention this in your request!", System.getProperty("os.arch")));
+					break saveLib;
+				}			
+			} else {
+				RConsole.logWarn(String.format("Your operating system is not supported. Please open a request here: https://github.com/TheDutchMC/rConsole/issues/new/choose. Your OS is '%s', make sure you mention this in your request!", System.getProperty("os.name")));
+				break saveLib;
 			}
 			
-			//Get only 'librconsole' and the file extension, since that is the name we want the file to have on disk
-			String[] nativeLibNameParts = nativeLibraryName.split(Pattern.quote("/"));
-			File libTmpFile = new File(tmpDir, nativeLibNameParts[nativeLibNameParts.length-1]);
-			libTmpFile.deleteOnExit();
-			
-			//Copy the file from the jar to the temporary file on disk
-			try {
-				InputStream in = libUrl.openStream();
-				Files.copy(in, libTmpFile.toPath());
-			} catch(IOException e) {
-				RConsole.logWarn("An error occurred while saving 'librconsole': " + e.getMessage());
-				RConsole.logDebug(Util.getStackTrace(e));
-				tmpDir.delete();
-				break saveNativeLib;
+			Pair<File, File> pairedFile = saveLib(libName);
+			if(pairedFile == null) {
+				break saveLib;
 			}
 			
-			//Finally, try to load the library
+			File tmpDir = pairedFile.a();
+			File libTmpFile = pairedFile.b();
+			
 			try {
 				System.load(libTmpFile.getAbsolutePath());
 			} catch(UnsatisfiedLinkError e) {
-				RConsole.logWarn("An error occurred while loading 'librconsole': " + e.getMessage());
-				RConsole.logDebug(Util.getStackTrace(e));
-				tmpDir.delete();
-				break saveNativeLib;
+				if(osName.contains("linux")) {
+					RConsole.logWarn("Failed to load libskinfixer Focal. Trying Bionic.");
+					
+					String loadBionicError = tryLoadAmd64Linux("bionic");
+					if(loadBionicError != null) {
+						RConsole.logWarn(loadBionicError);
+						RConsole.logWarn("Failed to load libskinfixer Bionic. Trying Xenial.");					
+						
+						String loadXenialError = tryLoadAmd64Linux("xenial");
+						if(loadXenialError != null) {
+							RConsole.logWarn(loadXenialError);
+							RConsole.logWarn("Failed to load libskinfixer Focal.");
+							printLibDebugHelp();
+						}
+					}
+				} else {
+					RConsole.logWarn("Failed to load library: " + e.getMessage());
+					libTmpFile.delete();
+					tmpDir.delete();
+					
+					printLibDebugHelp();
+					break saveLib;
+				}
 			}
-
+			
+			RConsole.logInfo("libskinfixer loaded.");
 			LIB_LOADED = true;
 		}
+	}
+	
+	private static String tryLoadAmd64Linux(String distro) {
+		String name = String.format("/x86_64/linux/libskinfixer-%s.so", distro);
+		Pair<File, File> pairedFile = saveLib(name);
+		if(pairedFile == null) {
+			return String.format("Failed to save library libskinfixer-%.so", distro);
+		}
+		
+		File tmpFolder = pairedFile.a();
+		File libTmpFile = pairedFile.b();
+		
+		try {
+			System.load(libTmpFile.getAbsolutePath());
+		} catch(UnsatisfiedLinkError e) {
+			libTmpFile.delete();
+			tmpFolder.delete();
+			return String.format("Failed to load library libskinfixer-%.so: %s", distro, Util.getStackTrace(e));
+		}
+		
+		return null;
+	}
+	
+	private static void printLibDebugHelp() {
+		RConsole.logWarn("Check that all required dependencies are installed.");
+		RConsole.logWarn("You should make sure that you are using GLIBC >=2.23.");
+		RConsole.logWarn("If you are using GLIBC =< 2.23, make sure that you have libssl 1.0.0 AND libcrypto 1.0.0 installed.");
+		RConsole.logWarn("If you are using GLIBC >= 2.31, make sure that you have OpenSSL (libssl 1.1 AND libcrypto 1.1)installed.");
+		RConsole.logWarn("For more help you can join Dutchy76's Discord: https://discord.com/invite/xE3FcGj");
+		RConsole.logWarn("Alternatively, you can open an issue on GitHub: https://github.com/TheDutchMC/SkinFixer/issues/new/choose");
+		RConsole.logWarn("In either case, please include your Operating System, OS version, architecture, Minecraft version and the version of SkinFixer you are using");
+	}
+	
+	@Nullable
+	private static Pair<File, File> saveLib(String libName) {
+		URL libUrl = WebServer.class.getResource(libName);
+		File tmpDir;
+		try {
+			tmpDir = Files.createTempDirectory("libskinfixer").toFile();
+		} catch (IOException e) {
+			RConsole.logWarn("Failed to create temporary directory: " + e);
+			return null;
+		}
+		
+		String[] libNameParts = libName.split(Pattern.quote("/"));
+		File libTmpFile = new File(tmpDir, libNameParts[libNameParts.length -1]);
+		
+		try {
+			InputStream is = libUrl.openStream();
+			Files.copy(is, libTmpFile.toPath());
+		} catch(IOException e) {
+			tmpDir.delete();
+			
+			RConsole.logWarn("Failed to save dynamic library as temporay file: " + e);
+			return null;
+		}
+		
+		libTmpFile.deleteOnExit();
+		tmpDir.deleteOnExit();
+		
+		return new Pair<File, File>(tmpDir, libTmpFile);
 	}
 	
 	/**
@@ -194,10 +272,10 @@ public class WebServer {
 		//We always want to re-extract the zip file, because if there is an update to the plugin
 		//the static web files also need to be updated. By deleting it every time,
 		//we can guarantee that the files are always up to date.
-		saveResource.accept("dist.zip", true);
+		saveResource.accept("web.zip", true);
 		try {
-			File finalDistZipFile = new File(staticFilesFolder, "dist.zip");
-			Files.move(new File(dataFolder, "dist.zip").toPath(), finalDistZipFile.toPath());
+			File finalDistZipFile = new File(staticFilesFolder, "web.zip");
+			Files.move(new File(dataFolder, "web.zip").toPath(), finalDistZipFile.toPath());
 			new ZipFile(finalDistZipFile).extractAll(staticFilesFolder.getAbsolutePath());
 			
 			finalDistZipFile.delete();

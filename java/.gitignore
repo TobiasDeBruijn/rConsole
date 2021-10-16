@@ -4,6 +4,7 @@ input-files/
 releases/
 server/
 build/
+bin/
 .settings/
 
 .classpath

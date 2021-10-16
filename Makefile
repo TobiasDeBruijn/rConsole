@@ -18,7 +18,7 @@ release:
 	mkdir -p ${GRADLE_COPY_DIR}/web/
 
 	cp -r ${LIB_OUTPUT}/* ${GRADLE_COPY_DIR}
-	cp -r ${WEB_OUTPUT}/* ${GRADLE_COPY_DIR}/web/
+	cp -r ${WEB_OUTPUT}/* ${GRADLE_COPY_DIR}
 
 	${MAKE} --directory=${PWD}/${JAVA}
 
