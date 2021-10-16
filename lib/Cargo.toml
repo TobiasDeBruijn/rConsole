@@ -1,0 +1,39 @@
+[package]
+name = "rconsole"
+version = "0.5.1"
+authors = ["Tobias de Bruijn <github@thedutchmc.nl>"]
+edition = "2018"
+
+[lib]
+name = "rconsole"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+actix-web = "3"
+actix-files = "0.5.0"
+actix-cors = "0.5.4"
+serde = { version = "1.0.123", features = ["derive"] }
+serde_json = "1.0.64"
+serde_yaml = "0.8.17"
+jni = "0.19.0"
+rand = "0.8.3"
+lazy_static = "1.4.0"
+flurry = "0.3.1"
+rusqlite = { version = "0.25.0", features = ["bundled"]}
+bcrypt = "0.9.0"
+sha2 = "0.9.3"
+base64 = "0.13.0"
+chrono = "0.4.19"
+
+# I dont directly depend on typenum, but actix does
+# And we need the no_std version, because of Ubuntu Xenial.
+# https://github.com/paholg/typenum/issues/172
+typenum = { version = "1.13.0", features = ["no_std"]}
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.93"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["std", "processthreadsapi", "minwindef"]}
+regex = "1.4.6"

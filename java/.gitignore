@@ -1,0 +1,10 @@
+.build/
+.gradle/
+input-files/
+releases/
+server/
+build/
+.settings/
+
+.classpath
+.project

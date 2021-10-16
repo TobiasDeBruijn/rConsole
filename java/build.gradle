@@ -1,0 +1,55 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'    
+}
+
+sourceCompatibility = 1.16
+targetCompatibility = 1.16
+
+group 'dev.array21'
+
+repositories {
+	mavenCentral()
+	maven{ url "https://hub.spigotmc.org/nexus/content/repositories/snapshots" }
+	maven{ url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+dependencies {	
+    implementation 'net.lingala.zip4j:zip4j:2.7.0'
+    implementation 'dev.array21:httplib:1.2.1'
+
+	compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly 'org.yaml:snakeyaml:1.8'
+    compileOnly 'com.google.code.gson:gson:2.8.6'
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
+}
+
+task testJar(type: ShadowJar) {
+	dependsOn('copyInput')
+
+	description 'Build a test Jar'
+	archiveClassifier = 'DEV'
+	from sourceSets.main.output
+	configurations = [project.configurations.runtimeClasspath]	
+	destinationDirectory = file("$rootDir/server/plugins")
+}
+
+task releaseJar(type: ShadowJar) {
+	dependsOn('copyInput')
+
+	description 'Build a release Jar'
+	archiveClassifier = 'RELEASE'
+	from sourceSets.main.output
+	configurations = [project.configurations.runtimeClasspath]
+	destinationDirectory = file("$rootDir/releases")
+}
+
+task copyInput(type: Copy) {
+	from "$rootDir/input-files/"
+	into "$buildDir/resources/main/"
+}
